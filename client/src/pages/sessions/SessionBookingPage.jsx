@@ -23,13 +23,11 @@ const SessionBookingPage = () => {
   });
 
   useEffect(() => {
-    // Redirect to login if not authenticated
     if (!currentUser) {
       navigate("/auth/login");
       return;
     }
 
-    // Only students can book sessions
     if (currentUser.role !== "student") {
       navigate("/unauthorized");
       return;
@@ -69,7 +67,6 @@ const SessionBookingPage = () => {
 
     setSubmitting(true);
     try {
-      // Check if slot is available
       const availabilityResponse = await sessionAPI.checkAvailability(
         tutorId,
         formData.date,
@@ -82,17 +79,13 @@ const SessionBookingPage = () => {
         return;
       }
 
-      // Split timeSlot into start and end times
       const [start, end] = formData.timeSlot.split("-");
 
-      // Ensure that start and end have the correct format (HH:MM)
       const formatTime = (timeStr) => {
-        // If the time is already in HH:MM format, return as is
         if (/^\d{2}:\d{2}$/.test(timeStr)) {
           return timeStr;
         }
 
-        // Otherwise, assume it needs formatting
         const parts = timeStr.split(":");
         const hour = parts[0].padStart(2, "0");
         const minute = parts.length > 1 ? parts[1].padStart(2, "0") : "00";
@@ -102,12 +95,11 @@ const SessionBookingPage = () => {
       const formattedStart = formatTime(start);
       const formattedEnd = formatTime(end);
 
-      // Book the session
       const bookingResponse = await sessionAPI.bookSession({
         tutorId,
-        date: formData.date, // Use ISO date format YYYY-MM-DD
-        start: formattedStart, // Send formatted start time HH:MM
-        end: formattedEnd, // Send formatted end time HH:MM
+        date: formData.date,
+        start: formattedStart,
+        end: formattedEnd,
         type: formData.type,
         notes: formData.notes,
       });
@@ -129,7 +121,6 @@ const SessionBookingPage = () => {
     }
   };
 
-  // Format date for display
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       weekday: "long",

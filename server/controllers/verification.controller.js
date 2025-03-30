@@ -1,11 +1,9 @@
 import { VerificationRequest, Tutor } from "../models/index.js";
 
-// Submit verification request
 export const submitVerificationRequest = async (req, res, next) => {
   try {
     const { documents } = req.body;
 
-    // Verify the user is a tutor
     if (req.user.role !== "tutor") {
       return res.status(403).json({
         success: false,
@@ -13,7 +11,6 @@ export const submitVerificationRequest = async (req, res, next) => {
       });
     }
 
-    // Find tutor record
     const tutor = await Tutor.findOne({ userId: req.user._id });
 
     if (!tutor) {
@@ -23,7 +20,6 @@ export const submitVerificationRequest = async (req, res, next) => {
       });
     }
 
-    // Check if already verified
     if (tutor.isVerified) {
       return res.status(400).json({
         success: false,
@@ -31,7 +27,6 @@ export const submitVerificationRequest = async (req, res, next) => {
       });
     }
 
-    // Check if there's a pending request
     const existingRequest = await VerificationRequest.findOne({
       tutorId: tutor._id,
     });
@@ -44,7 +39,6 @@ export const submitVerificationRequest = async (req, res, next) => {
       });
     }
 
-    // Create verification request
     const verificationRequest = await VerificationRequest.create({
       tutorId: tutor._id,
       documents,
@@ -61,10 +55,8 @@ export const submitVerificationRequest = async (req, res, next) => {
   }
 };
 
-// Get all pending verification requests (admin only)
 export const getPendingRequests = async (req, res, next) => {
   try {
-    // Verify the user is an admin
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -72,7 +64,6 @@ export const getPendingRequests = async (req, res, next) => {
       });
     }
 
-    // Get requests with pagination
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
@@ -106,13 +97,11 @@ export const getPendingRequests = async (req, res, next) => {
   }
 };
 
-// Approve/reject verification request (admin only)
 export const handleVerificationRequest = async (req, res, next) => {
   try {
     const { status, adminComment } = req.body;
     const requestId = req.params.id;
 
-    // Verify the user is an admin
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -143,13 +132,10 @@ export const handleVerificationRequest = async (req, res, next) => {
       });
     }
 
-    // Update the request status
     request.status = status;
     if (adminComment) request.adminComment = adminComment;
 
     await request.save();
-
-    // The pre-save hook in the model will auto-update tutor's isVerified status if approved
 
     res.status(200).json({
       success: true,
@@ -161,10 +147,8 @@ export const handleVerificationRequest = async (req, res, next) => {
   }
 };
 
-// Get verification statistics (admin only)
 export const getVerificationStats = async (req, res, next) => {
   try {
-    // Verify the user is an admin
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -181,7 +165,6 @@ export const getVerificationStats = async (req, res, next) => {
       },
     ]);
 
-    // Format the stats into a more readable format
     const formattedStats = {
       pending: 0,
       approved: 0,
@@ -194,11 +177,9 @@ export const getVerificationStats = async (req, res, next) => {
       formattedStats.totalRequests += stat.count;
     });
 
-    // Get total verified tutors count
     const verifiedTutors = await Tutor.countDocuments({ isVerified: true });
     formattedStats.verifiedTutors = verifiedTutors;
 
-    // Get total unverified tutors count
     const unverifiedTutors = await Tutor.countDocuments({ isVerified: false });
     formattedStats.unverifiedTutors = unverifiedTutors;
 

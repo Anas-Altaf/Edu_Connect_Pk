@@ -33,7 +33,6 @@ const UserDetailsPage = () => {
             status: userData.status || "active",
           });
 
-          // If user is a tutor, fetch tutor profile
           if (userData.role === "tutor") {
             try {
               const tutorResponse = await tutorAPI.getTutorByUserId(

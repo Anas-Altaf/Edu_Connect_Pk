@@ -58,14 +58,12 @@ const ProfilePage = () => {
     setSubmitting(true);
 
     try {
-      // Extract email from the form data as we don't want to update it
       const { email, ...updateData } = formData;
 
       const response = await userAPI.updateProfile(updateData);
       if (response.data.success) {
         toast.success("Profile updated successfully!");
 
-        // Update the user context with new information
         updateCurrentUser({
           ...currentUser,
           name: formData.name,

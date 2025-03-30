@@ -10,7 +10,6 @@ import authorize, { authorizeRoles } from "../middleware/auth.middleware.js";
 
 const wishlistRouter = Router();
 
-// All wishlist routes require student role
 wishlistRouter.use(authorize);
 wishlistRouter.use(authorizeRoles("student"));
 

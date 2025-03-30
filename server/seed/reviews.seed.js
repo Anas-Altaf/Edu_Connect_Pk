@@ -1,13 +1,10 @@
 import { Review, Tutor } from "../models/index.js";
 
 export const seedReviews = async (users, tutors) => {
-  // Filter student users
   const studentUsers = users.filter((user) => user.role === "student");
 
-  // Create reviews data
   const reviewsData = [];
 
-  // Sample review comments based on rating
   const reviewComments = {
     1: [
       "Very disappointed with the session. The tutor was not prepared.",
@@ -34,16 +31,11 @@ export const seedReviews = async (users, tutors) => {
     ],
   };
 
-  // For each student-tutor pair, create 0-3 reviews
   for (const student of studentUsers) {
     for (const tutor of tutors) {
-      // Randomly decide if this student will review this tutor
       if (Math.random() > 0.3) {
-        // 70% chance to create a review
-        // Generate a random rating between 3-5 (most likely positive)
         const rating = Math.floor(Math.random() * 3) + 3;
 
-        // Select a random comment for this rating
         const comments = reviewComments[rating];
         const comment = comments[Math.floor(Math.random() * comments.length)];
 
@@ -57,11 +49,9 @@ export const seedReviews = async (users, tutors) => {
     }
   }
 
-  // Insert all reviews into database
   const reviews = await Review.insertMany(reviewsData);
   console.log(`${reviews.length} reviews created`);
 
-  // Update tutor average ratings
   for (const tutor of tutors) {
     const tutorReviews = reviews.filter(
       (review) => review.tutorId.toString() === tutor._id.toString()

@@ -25,11 +25,9 @@ const TutorSearchPage = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Reset error state when filters or page changes
     setError(null);
     fetchTutors();
 
-    // If the user is a student, fetch their wishlist
     if (currentUser && currentUser.role === "student") {
       fetchWishlist();
     }
@@ -66,7 +64,6 @@ const TutorSearchPage = () => {
     try {
       const response = await wishlistAPI.getWishlist();
       if (response.data.success) {
-        // Extract tutor IDs from wishlist response
         const tutorIds = response.data.data.tutorIds || [];
         setWishlist(tutorIds);
       }
@@ -90,12 +87,10 @@ const TutorSearchPage = () => {
       const isInWishlist = wishlist.includes(tutorId);
 
       if (isInWishlist) {
-        // Remove from wishlist
         await wishlistAPI.removeTutorFromWishlist(tutorId);
         setWishlist(wishlist.filter((id) => id !== tutorId));
         toast.success("Removed from wishlist");
       } else {
-        // Add to wishlist
         await wishlistAPI.addTutorToWishlist(tutorId);
         setWishlist([...wishlist, tutorId]);
         toast.success("Added to wishlist");
@@ -116,7 +111,7 @@ const TutorSearchPage = () => {
       ...filters,
       [name]: value,
     });
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
   const handleFilterClear = () => {

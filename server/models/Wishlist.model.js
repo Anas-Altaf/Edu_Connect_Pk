@@ -31,12 +31,9 @@ const WishlistSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Ensure unique tutors in wishlist
 WishlistSchema.pre("save", function (next) {
-  // Get unique tutor IDs as strings
   const uniqueTutorIds = [...new Set(this.tutorIds.map((id) => id.toString()))];
 
-  // Convert back to ObjectId instances using new keyword
   this.tutorIds = uniqueTutorIds.map((id) => new mongoose.Types.ObjectId(id));
 
   next();

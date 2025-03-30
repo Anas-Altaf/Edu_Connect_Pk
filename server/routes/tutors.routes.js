@@ -13,12 +13,10 @@ import authorize, { authorizeRoles } from "../middleware/auth.middleware.js";
 
 const tutorRouter = Router();
 
-// Public routes
 tutorRouter.get("/", getAllTutors);
 tutorRouter.get("/:id", getTutorDetails);
 tutorRouter.get("/:id/preview", getTutorPreview);
 
-// Protected routes
 tutorRouter.put("/:id", authorize, authorizeRoles("tutor"), updateTutorProfile);
 tutorRouter.put(
   "/:id/availability",

@@ -17,7 +17,6 @@ export const createRateChangeNotifications = async (
   wishlists
 ) => {
   try {
-    // Create notifications for each student
     const notifications = wishlists.map((wishlist) => ({
       userId: wishlist.studentId,
       type: "RATE_CHANGE",

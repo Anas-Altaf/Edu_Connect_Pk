@@ -40,14 +40,14 @@ const NotificationsPage = () => {
     try {
       if (!notification.isRead) {
         await notificationAPI.markAsRead(notification._id);
-        
-        // Update local state
-        setNotifications(prev => 
-          prev.map(n => n._id === notification._id ? { ...n, isRead: true } : n)
+
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n._id === notification._id ? { ...n, isRead: true } : n
+          )
         );
       }
-      
-      // Navigate if there's a link
+
       if (notification.link) {
         navigate(notification.link);
       }
@@ -60,7 +60,7 @@ const NotificationsPage = () => {
     e.stopPropagation();
     try {
       await notificationAPI.deleteNotification(id);
-      setNotifications(prev => prev.filter(n => n._id !== id));
+      setNotifications((prev) => prev.filter((n) => n._id !== id));
       toast.success("Notification deleted");
     } catch (err) {
       console.error("Error deleting notification:", err);
@@ -72,7 +72,7 @@ const NotificationsPage = () => {
     try {
       const success = await markAllAsRead();
       if (success) {
-        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
         toast.success("All notifications marked as read");
       }
     } catch (err) {
@@ -83,7 +83,7 @@ const NotificationsPage = () => {
 
   const getNotificationTypeIcon = (type) => {
     switch (type?.toLowerCase()) {
-      case 'session_reminder':
+      case "session_reminder":
         return (
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -102,7 +102,7 @@ const NotificationsPage = () => {
             <line x1="3" y1="10" x2="21" y2="10"></line>
           </svg>
         );
-      case 'rate_change':
+      case "rate_change":
         return (
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -119,7 +119,7 @@ const NotificationsPage = () => {
             <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
           </svg>
         );
-      case 'review_request':
+      case "review_request":
         return (
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -162,7 +162,9 @@ const NotificationsPage = () => {
         <div className="page-header">
           <div className="header-title">
             <h1 className="page-title">Notifications</h1>
-            <p className="page-description">Stay updated with the latest alerts and messages</p>
+            <p className="page-description">
+              Stay updated with the latest alerts and messages
+            </p>
           </div>
           {notifications.length > 0 && (
             <button className="btn btn-outline" onClick={handleMarkAllAsRead}>
@@ -201,10 +203,16 @@ const NotificationsPage = () => {
               {notifications.map((notification) => (
                 <div
                   key={notification._id}
-                  className={`notification-card ${!notification.isRead ? "unread" : ""}`}
+                  className={`notification-card ${
+                    !notification.isRead ? "unread" : ""
+                  }`}
                   onClick={() => handleNotificationClick(notification)}
                 >
-                  <div className={`notification-icon notification-icon-${notification.type?.toLowerCase() || "default"}`}>
+                  <div
+                    className={`notification-icon notification-icon-${
+                      notification.type?.toLowerCase() || "default"
+                    }`}
+                  >
                     {getNotificationTypeIcon(notification.type)}
                   </div>
                   <div className="notification-content">
@@ -221,7 +229,9 @@ const NotificationsPage = () => {
                   </div>
                   <button
                     className="notification-delete"
-                    onClick={(e) => handleDeleteNotification(e, notification._id)}
+                    onClick={(e) =>
+                      handleDeleteNotification(e, notification._id)
+                    }
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -247,7 +257,7 @@ const NotificationsPage = () => {
               <div className="pagination">
                 <button
                   className="btn btn-outline btn-sm"
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
                 >
                   Previous
@@ -257,7 +267,7 @@ const NotificationsPage = () => {
                 </span>
                 <button
                   className="btn btn-outline btn-sm"
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
                 >
                   Next

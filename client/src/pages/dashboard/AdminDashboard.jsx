@@ -16,7 +16,6 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Ensure only admins can access this page
     if (currentUser && currentUser.role !== "admin") {
       navigate("/unauthorized");
       return;
@@ -25,15 +24,13 @@ const AdminDashboard = () => {
     const fetchDashboardStats = async () => {
       setLoading(true);
       try {
-        // Fetch users stats - modified to handle different API response structure
         const usersResponse = await userAPI.getAllUsers({
-          limit: 1, // Just to get stats, not actual users
+          limit: 1,
           includeStats: true,
         });
 
         console.log("Users response:", usersResponse.data);
 
-        // Fetch verification stats
         let verificationStats = { pendingCount: 0 };
         try {
           const verificationResponse = await verificationAPI.getStats();
@@ -49,7 +46,6 @@ const AdminDashboard = () => {
           );
         }
 
-        // Fetch session stats for the last 30 days
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - 30);
         const endDate = new Date();
@@ -68,7 +64,6 @@ const AdminDashboard = () => {
           console.error("Error fetching session stats:", sessionError);
         }
 
-        // Extract user stats from response or use defaults
         const userStats = {
           total:
             usersResponse.data.stats?.total || usersResponse.data.total || 0,
@@ -77,7 +72,6 @@ const AdminDashboard = () => {
           admins: usersResponse.data.stats?.admins || 0,
         };
 
-        // Update state with all stats
         setStats({
           users: userStats,
           verifications: {

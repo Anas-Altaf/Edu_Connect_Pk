@@ -10,10 +10,8 @@ import authorize from "../middleware/auth.middleware.js";
 
 const notificationRouter = Router();
 
-// All routes require authentication
 notificationRouter.use(authorize);
 
-// Notification routes
 notificationRouter.get("/", getNotifications);
 notificationRouter.get("/unread-count", getUnreadCount);
 notificationRouter.put("/all/read", markAllAsRead);

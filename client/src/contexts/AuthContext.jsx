@@ -9,7 +9,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [authInitialized, setAuthInitialized] = useState(false);
 
-  // Check if user is already logged in (token in localStorage)
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
@@ -19,7 +18,6 @@ export const AuthProvider = ({ children }) => {
           if (response.data.success) {
             setCurrentUser(response.data.data);
           } else {
-            // Token is invalid or expired
             localStorage.removeItem("token");
           }
         } catch (error) {
@@ -86,7 +84,6 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser(null);
   };
 
-  // Update the current user data
   const updateCurrentUser = (userData) => {
     setCurrentUser((prev) => ({
       ...prev,

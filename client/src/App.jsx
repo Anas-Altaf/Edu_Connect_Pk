@@ -3,16 +3,13 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// Providers
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 
-// Layout
 import Layout from "./components/layout/Layout";
 import ProtectedRoute from "./components/routing/ProtectedRoute";
 
-// Pages
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
@@ -30,7 +27,6 @@ import NotificationsPage from "./pages/notifications/NotificationsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 
-// Admin pages
 import UsersManagementPage from "./pages/admin/UsersManagementPage";
 import UserDetailsPage from "./pages/admin/UserDetailsPage";
 import VerificationRequestsPage from "./pages/admin/VerificationRequestsPage";

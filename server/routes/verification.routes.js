@@ -9,7 +9,6 @@ import authorize, { authorizeRoles } from "../middleware/auth.middleware.js";
 
 const verificationRouter = Router();
 
-// Protected routes
 verificationRouter.post(
   "/",
   authorize,

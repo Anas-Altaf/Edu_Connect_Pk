@@ -1,7 +1,6 @@
 import { Tutor, User, Wishlist, Notification } from "../models/index.js";
 import { createRateChangeNotifications } from "../utils/index.js";
 
-// Get all tutors with filtering
 export const getAllTutors = async (req, res, next) => {
   try {
     const {
@@ -43,7 +42,6 @@ export const getAllTutors = async (req, res, next) => {
       query["availability.day"] = day;
     }
 
-    // Sorting options
     let sortOptions = {};
     if (sortBy === "price-low") {
       sortOptions.hourlyRate = 1;
@@ -52,7 +50,7 @@ export const getAllTutors = async (req, res, next) => {
     } else if (sortBy === "rating") {
       sortOptions.averageRating = -1;
     } else {
-      sortOptions = { _id: -1 }; // Default
+      sortOptions = { _id: -1 };
     }
 
     const pageNum = parseInt(page, 10);
@@ -80,7 +78,6 @@ export const getAllTutors = async (req, res, next) => {
   }
 };
 
-// Get tutor details
 export const getTutorDetails = async (req, res, next) => {
   try {
     const tutor = await Tutor.findById(req.params.id)
@@ -103,7 +100,6 @@ export const getTutorDetails = async (req, res, next) => {
   }
 };
 
-// Create/Update tutor profile
 export const updateTutorProfile = async (req, res, next) => {
   try {
     const {
@@ -118,7 +114,6 @@ export const updateTutorProfile = async (req, res, next) => {
       availability,
     } = req.body;
 
-    // Ensure the user is a tutor
     if (req.user.role !== "tutor") {
       return res.status(403).json({
         success: false,
@@ -126,10 +121,8 @@ export const updateTutorProfile = async (req, res, next) => {
       });
     }
 
-    // Find tutor profile by user id
     let tutor = await Tutor.findOne({ userId: req.user._id });
     if (tutor) {
-      // Update tutor specific fields
       if (location) tutor.location = location;
       if (qualifications) tutor.qualifications = qualifications;
       if (subjects) tutor.subjects = subjects;
@@ -138,7 +131,6 @@ export const updateTutorProfile = async (req, res, next) => {
       if (availability) tutor.availability = availability;
       await tutor.save();
     } else {
-      // Create new tutor profile if not exists
       tutor = await Tutor.create({
         userId: req.user._id,
         location,
@@ -150,7 +142,6 @@ export const updateTutorProfile = async (req, res, next) => {
       });
     }
 
-    // Also update the corresponding user document for common fields
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       { $set: { name, bio, profilePicture } },
@@ -167,7 +158,6 @@ export const updateTutorProfile = async (req, res, next) => {
   }
 };
 
-// Update tutor availability
 export const updateTutorAvailability = async (req, res, next) => {
   try {
     const { availability } = req.body;
@@ -179,7 +169,6 @@ export const updateTutorAvailability = async (req, res, next) => {
       });
     }
 
-    // Validate availability format
     for (const slot of availability) {
       if (!slot.day || !slot.startTime || !slot.endTime) {
         return res.status(400).json({
@@ -213,7 +202,6 @@ export const updateTutorAvailability = async (req, res, next) => {
   }
 };
 
-// Update tutor hourly rate
 export const updateTutorRate = async (req, res, next) => {
   try {
     const { hourlyRate } = req.body;
@@ -238,13 +226,10 @@ export const updateTutorRate = async (req, res, next) => {
     tutor.hourlyRate = hourlyRate;
     await tutor.save();
 
-    // Create notifications for rate decrease
     if (hourlyRate < previousRate) {
-      // Find students who have this tutor in their wishlist
       const wishlists = await Wishlist.find({ tutorIds: tutor._id });
 
       if (wishlists.length > 0) {
-        // Use the utility function to create notifications
         await createRateChangeNotifications(
           tutor,
           req.user,
@@ -271,7 +256,6 @@ export const updateTutorRate = async (req, res, next) => {
   }
 };
 
-// Delete tutor profile
 export const deleteTutorProfile = async (req, res, next) => {
   try {
     const result = await Tutor.findOneAndDelete({ userId: req.user._id });
@@ -292,7 +276,6 @@ export const deleteTutorProfile = async (req, res, next) => {
   }
 };
 
-// Upload tutor profile image (metadata only, actual upload handled by frontend)
 export const updateProfileImage = async (req, res, next) => {
   try {
     const { profilePicture } = req.body;
@@ -320,7 +303,6 @@ export const updateProfileImage = async (req, res, next) => {
   }
 };
 
-// Get tutor profile preview
 export const getTutorPreview = async (req, res, next) => {
   try {
     const tutor = await Tutor.findById(req.params.id)

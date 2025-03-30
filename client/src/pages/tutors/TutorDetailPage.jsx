@@ -23,7 +23,6 @@ const TutorDetailPage = () => {
         if (response.data.success) {
           setTutor(response.data.data);
 
-          // Check if this tutor is in the user's wishlist
           if (currentUser && currentUser.role === "student") {
             try {
               const wishlistResponse = await wishlistAPI.getWishlist();
@@ -289,8 +288,7 @@ const TutorDetailPage = () => {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                // Handle review submission via backend API here.
-                // For now, display a confirmation message.
+
                 toast.success("Review submitted!");
               }}
             >

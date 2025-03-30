@@ -33,10 +33,8 @@ const ReviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// compound index to prevent multiple reviews from same student for same tutor
 ReviewSchema.index({ studentId: 1, tutorId: 1 }, { unique: true });
 
-// Update tutor's average rating when a review is added
 ReviewSchema.post("save", async function () {
   const Tutor = mongoose.model("Tutor");
   const Review = mongoose.model("Review");

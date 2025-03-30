@@ -17,12 +17,10 @@ import authorize, { authorizeRoles } from "../middleware/auth.middleware.js";
 
 const sessionRouter = Router();
 
-// Protected routes
 sessionRouter.post("/", authorize, authorizeRoles("student"), bookSession);
 
-// Important! Update these routes to reflect what the client expects
-sessionRouter.get("/student", authorize, getStudentSessions); // Changed from /student/:id
-sessionRouter.get("/tutor", authorize, getTutorSessions); // Changed from /tutor/:id
+sessionRouter.get("/student", authorize, getStudentSessions);
+sessionRouter.get("/tutor", authorize, getTutorSessions);
 
 sessionRouter.get("/stats", authorize, getSessionStats);
 sessionRouter.put("/:id", authorize, updateSession);

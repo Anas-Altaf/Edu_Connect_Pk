@@ -34,7 +34,6 @@ const SessionEditPage = () => {
           const sessionData = response.data.data;
           setOriginalSession(sessionData);
 
-          // Check if the user has permission to edit this session
           const isStudent =
             currentUser._id === sessionData.studentId?._id ||
             currentUser._id === sessionData.studentId;
@@ -49,14 +48,12 @@ const SessionEditPage = () => {
             return;
           }
 
-          // Can only edit pending or confirmed sessions
           if (!["pending", "confirmed"].includes(sessionData.status)) {
             toast.error(`Cannot edit a session that is ${sessionData.status}`);
             navigate(`/sessions/${sessionId}`);
             return;
           }
 
-          // Set form data
           setFormData({
             date: new Date(sessionData.date).toISOString().split("T")[0],
             timeSlot: sessionData.timeSlot,
@@ -84,7 +81,6 @@ const SessionEditPage = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      // Check if the time slot is available (only if date or time has changed)
       if (
         formData.date !== originalSession.date ||
         formData.timeSlot !== originalSession.timeSlot

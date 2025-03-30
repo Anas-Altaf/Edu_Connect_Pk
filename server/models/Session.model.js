@@ -26,7 +26,6 @@ const SessionSchema = new mongoose.Schema(
       trim: true,
       validate: {
         validator: function (v) {
-          // Validate time slot format (e.g., "09:00-10:00")
           return /^\d{1,2}:\d{2}-\d{1,2}:\d{2}$/.test(v);
         },
         message: "Time slot should be in the format HH:MM-HH:MM",
@@ -95,13 +94,11 @@ const SessionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Prevent double booking
 SessionSchema.pre("save", async function (next) {
-  // Only check for conflicts if this is a new session or if the date/time is changing
   if (this.isNew || this.isModified("date") || this.isModified("startTime")) {
     const existingSession = await this.constructor.findOne({
       tutorId: this.tutorId,
-      _id: { $ne: this._id }, // Skip the current document when updating
+      _id: { $ne: this._id },
       status: { $ne: "canceled" },
       $or: [
         { startTime: this.startTime },

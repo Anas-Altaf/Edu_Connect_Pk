@@ -21,26 +21,23 @@ const StudentDashboard = () => {
     const fetchDashboardData = async () => {
       setLoading(true);
       try {
-        // Fetch session stats
         const statsResponse = await sessionAPI.getSessionStats();
         if (statsResponse.data.success) {
           setStats(statsResponse.data.data);
         }
 
-        // Fetch upcoming sessions
         const sessionsResponse = await sessionAPI.getStudentSessions({
           status: "confirmed",
         });
         if (sessionsResponse.data.success) {
           const sessions = sessionsResponse.data.data || [];
-          // Sort by date, closest first
+
           const sortedSessions = sessions
             .sort((a, b) => new Date(a.date) - new Date(b.date))
-            .slice(0, 3); // Get only the next 3 sessions
+            .slice(0, 3);
           setUpcomingSessions(sortedSessions);
         }
 
-        // Fetch wishlist count
         try {
           const wishlistResponse = await wishlistAPI.getWishlistCount();
           if (wishlistResponse.data.success) {
@@ -60,7 +57,6 @@ const StudentDashboard = () => {
     fetchDashboardData();
   }, []);
 
-  // Format date for display
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       weekday: "short",
@@ -127,7 +123,9 @@ const StudentDashboard = () => {
                 >
                   <div className="session-date">
                     <span className="date-icon">📅</span>
-                    <span className="date-text">{formatDate(session.date)}</span>
+                    <span className="date-text">
+                      {formatDate(session.date)}
+                    </span>
                     <span className="time-text">{session.timeSlot}</span>
                   </div>
 
@@ -136,7 +134,8 @@ const StudentDashboard = () => {
                       {session.tutorId?.userId?.name || "Tutor"}
                     </span>
                     <span className="session-type">
-                      {session.type === "online" ? "Online" : "In-person"} session
+                      {session.type === "online" ? "Online" : "In-person"}{" "}
+                      session
                     </span>
                   </div>
 
@@ -179,8 +178,8 @@ const StudentDashboard = () => {
           ) : (
             <div className="wishlist-preview">
               <p>
-                You have {wishlistCount} tutor{wishlistCount !== 1 ? "s" : ""} in
-                your wishlist. Visit your wishlist to view them or book a
+                You have {wishlistCount} tutor{wishlistCount !== 1 ? "s" : ""}{" "}
+                in your wishlist. Visit your wishlist to view them or book a
                 session.
               </p>
               <Link to="/wishlist" className="btn btn-primary btn-sm">

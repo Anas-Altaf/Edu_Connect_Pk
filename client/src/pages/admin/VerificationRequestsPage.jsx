@@ -56,7 +56,7 @@ const VerificationRequestsPage = () => {
             status === "approved" ? "approved" : "rejected"
           }`
         );
-        // Remove from the list or update status
+
         setVerifications(verifications.filter((v) => v._id !== id));
         setSelectedRequest(null);
         setComment("");

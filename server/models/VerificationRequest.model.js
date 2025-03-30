@@ -15,7 +15,6 @@ const VerificationRequestSchema = new mongoose.Schema(
         trim: true,
         validate: {
           validator: function (v) {
-            // Check for common file extensions for documents
             return /\.(pdf|doc|docx|jpg|jpeg|png)$/i.test(v);
           },
           message: "Document URL must point to a valid file type",
@@ -37,7 +36,6 @@ const VerificationRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Auto-verify tutor when request is approved
 VerificationRequestSchema.pre("save", async function (next) {
   if (this.isModified("status") && this.status === "approved") {
     const Tutor = mongoose.model("Tutor");

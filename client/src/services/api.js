@@ -1,10 +1,8 @@
 import axios from "axios";
 
-// Set baseURL for all requests - ensure this points to your running backend
 axios.defaults.baseURL =
   import.meta.env.VITE_API_URL || "http://localhost:5500";
 
-// Request interceptor to add auth token to requests
 axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -16,7 +14,6 @@ axios.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor - add more detailed logging
 axios.interceptors.response.use(
   (response) => {
     console.log(
@@ -35,18 +32,14 @@ axios.interceptors.response.use(
       error.response?.data
     );
 
-    // Remove forced reload on unauthorized errors.
     if (error.response?.status === 401 && !error.config._retry) {
       localStorage.removeItem("token");
-      // Instead of reloading the page:
-      // window.location.href = "/auth/login";
     }
 
     return Promise.reject(error);
   }
 );
 
-// Auth API
 export const authAPI = {
   login: (email, password, role) =>
     axios.post("/api/v1/auth/sign-in", { email, password, role }),
@@ -58,7 +51,6 @@ export const authAPI = {
     axios.post("/api/v1/auth/forgot-password", { email }),
 };
 
-// User API
 export const userAPI = {
   getProfile: () => axios.get("/api/v1/users/profile"),
   updateProfile: (data) => axios.put("/api/v1/users/profile", data),
@@ -66,7 +58,6 @@ export const userAPI = {
     axios.put("/api/v1/users/password", { currentPassword, newPassword }),
   deleteAccount: () => axios.delete("/api/v1/users"),
 
-  // Admin user management endpoints - updated to match backend routes
   getAllUsers: (params) => axios.get("/api/v1/users", { params }),
   getUserById: (userId) => axios.get(`/api/v1/users/${userId}`),
   updateUser: (userId, userData) =>
@@ -77,7 +68,6 @@ export const userAPI = {
   createUser: (userData) => axios.post("/api/v1/users", userData),
 };
 
-// Tutor API
 export const tutorAPI = {
   getAllTutors: (filters) => axios.get("/api/v1/tutors", { params: filters }),
   getTutorDetails: (id) => axios.get(`/api/v1/tutors/${id}`),
@@ -91,7 +81,6 @@ export const tutorAPI = {
   updateProfileImage: (id, profilePicture) =>
     axios.post(`/api/v1/tutors/${id}/profile-image`, { profilePicture }),
   searchTutors: async (filters) => {
-    // Convert filters to query string parameters
     const queryParams = new URLSearchParams();
 
     if (filters.subject) queryParams.append("subject", filters.subject);
@@ -102,17 +91,16 @@ export const tutorAPI = {
       queryParams.append("rating", filters.rating);
     if (filters.availableDay) queryParams.append("day", filters.availableDay);
     if (filters.sortBy) {
-      // Convert frontend sort params to backend sort params
       let sort = "";
       switch (filters.sortBy) {
         case "rating":
-          sort = "-averageRating"; // Descending order
+          sort = "-averageRating";
           break;
         case "priceAsc":
-          sort = "hourlyRate"; // Ascending order
+          sort = "hourlyRate";
           break;
         case "priceDesc":
-          sort = "-hourlyRate"; // Descending order
+          sort = "-hourlyRate";
           break;
         default:
           sort = "-averageRating";
@@ -127,7 +115,6 @@ export const tutorAPI = {
   getTutorByUserId: (userId) => axios.get(`/api/v1/tutors/user/${userId}`),
 };
 
-// Session API
 export const sessionAPI = {
   bookSession: (data) => axios.post("/api/v1/sessions", data),
   getSessionDetails: (id) => axios.get(`/api/v1/sessions/${id}`),
@@ -146,13 +133,11 @@ export const sessionAPI = {
   completeSession: (id) => axios.put(`/api/v1/sessions/${id}/complete`),
   getEarningsSummary: () => axios.get(`/api/v1/sessions/tutor/earnings`),
   checkAvailability: (tutorId, date, timeSlot) => {
-    // Ensure date is in the correct format (YYYY-MM-DD)
     let formattedDate = date;
     if (date instanceof Date) {
       formattedDate = date.toISOString().split("T")[0];
     }
 
-    // Ensure timeSlot is properly formatted (HH:MM-HH:MM)
     let formattedTimeSlot = timeSlot;
     if (timeSlot && timeSlot.includes("-")) {
       const [start, end] = timeSlot.split("-");
@@ -176,7 +161,6 @@ export const sessionAPI = {
   getSessionStats: () => axios.get("/api/v1/sessions/stats"),
 };
 
-// Review API
 export const reviewAPI = {
   addReview: (tutorId, rating, comment) =>
     axios.post("/api/v1/reviews", { tutorId, rating, comment }),
@@ -184,7 +168,6 @@ export const reviewAPI = {
   deleteReview: (id) => axios.delete(`/api/v1/reviews/${id}`),
 };
 
-// Wishlist API
 export const wishlistAPI = {
   addTutorToWishlist: (tutorId) => axios.post("/api/v1/wishlist", { tutorId }),
   getWishlist: () => axios.get("/api/v1/wishlist"),
@@ -194,7 +177,6 @@ export const wishlistAPI = {
   getWishlistCount: () => axios.get("/api/v1/wishlist/count"),
 };
 
-// Verification API
 export const verificationAPI = {
   submitRequest: (documents) =>
     axios.post("/api/v1/verification", { documents }),
@@ -206,7 +188,6 @@ export const verificationAPI = {
   getStats: () => axios.get("/api/v1/verification/stats"),
 };
 
-// Report API
 export const reportAPI = {
   getAllReports: (type, page, limit) =>
     axios.get("/api/v1/reports", { params: { type, page, limit } }),
@@ -227,7 +208,6 @@ export const reportAPI = {
     }),
 };
 
-// Notification API
 export const notificationAPI = {
   getNotifications: (page = 1, limit = 10) =>
     axios.get("/api/v1/notifications", { params: { page, limit } }),

@@ -9,7 +9,7 @@ import authorize from "../middleware/auth.middleware.js";
 
 const userRouter = Router();
 
-userRouter.use(authorize); // All routes require authentication
+userRouter.use(authorize);
 
 userRouter.get("/profile", authorize, getUserProfile);
 userRouter.put("/profile", authorize, updateUserProfile);

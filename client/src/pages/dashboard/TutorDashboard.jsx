@@ -23,7 +23,6 @@ const TutorDashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Get sessions - first fetch upcoming sessions (confirmed status)
         const sessionResponse = await sessionAPI.getTutorSessions({
           status: "confirmed",
         });
@@ -31,7 +30,6 @@ const TutorDashboard = () => {
         console.log("Tutor sessions response:", sessionResponse.data);
 
         if (sessionResponse.data.success) {
-          // Handle different response structures
           let sessionData = [];
 
           if (Array.isArray(sessionResponse.data.data)) {
@@ -48,7 +46,6 @@ const TutorDashboard = () => {
           toast.error("Failed to load sessions");
         }
 
-        // Get earnings data
         const earningsResponse = await sessionAPI.getEarningsSummary();
         console.log("Earnings response:", earningsResponse.data);
 
@@ -60,7 +57,6 @@ const TutorDashboard = () => {
           });
         }
 
-        // Get session stats
         const statsResponse = await sessionAPI.getSessionStats();
         console.log("Stats response:", statsResponse.data);
 
@@ -78,7 +74,6 @@ const TutorDashboard = () => {
     fetchDashboardData();
   }, []);
 
-  // Format date for display
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       weekday: "short",
@@ -87,7 +82,6 @@ const TutorDashboard = () => {
     });
   };
 
-  // Get status badge class
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case "pending":

@@ -32,7 +32,6 @@ const LoginPage = () => {
       const result = await login(email, password, role);
 
       if (result.success) {
-        // Navigate to the intended page or dashboard
         navigate(from, { replace: true });
       } else {
         setError(result.message || "Login failed. Please try again.");

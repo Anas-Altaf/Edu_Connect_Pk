@@ -12,7 +12,6 @@ import authorize, { authorizeRoles } from "../middleware/auth.middleware.js";
 
 const reportRouter = Router();
 
-// All report routes require admin role
 reportRouter.use(authorize);
 reportRouter.use(authorizeRoles("admin"));
 

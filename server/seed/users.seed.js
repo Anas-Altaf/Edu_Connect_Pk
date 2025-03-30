@@ -2,7 +2,6 @@ import bcrypt from "bcryptjs";
 import { User } from "../models/index.js";
 
 export const seedUsers = async () => {
-  // Hash password once for all users
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash("Password123", salt);
 
@@ -81,10 +80,8 @@ export const seedUsers = async () => {
     },
   ];
 
-  // Insert all users into database
   const users = await User.insertMany(usersData);
   console.log(`${users.length} users created`);
 
-  // Return created users for use in other seed files
   return users;
 };

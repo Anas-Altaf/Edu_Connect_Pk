@@ -14,7 +14,7 @@ const SessionsPage = () => {
   const [calendarSessions, setCalendarSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [calendarLoading, setCalendarLoading] = useState(true);
-  const [view, setView] = useState("list"); // list or calendar
+  const [view, setView] = useState("list");
   const [stats, setStats] = useState({
     upcoming: 0,
     pending: 0,
@@ -22,7 +22,6 @@ const SessionsPage = () => {
     canceled: 0,
   });
 
-  // Fetch sessions based on active tab
   useEffect(() => {
     const fetchSessions = async () => {
       setLoading(true);
@@ -35,7 +34,6 @@ const SessionsPage = () => {
         console.log("Fetching sessions with filters:", filters);
         console.log("Current user role:", currentUser.role);
 
-        // Make sure we're using the correct API endpoint
         const apiCall =
           currentUser.role === "tutor"
             ? sessionAPI.getTutorSessions(filters)
@@ -52,7 +50,6 @@ const SessionsPage = () => {
         console.log("Sessions response:", response.data);
 
         if (response.data.success) {
-          // Make sure we're accessing the correct property in the response
           let sessionData = [];
 
           if (Array.isArray(response.data.data)) {
@@ -65,7 +62,6 @@ const SessionsPage = () => {
             console.log("Nested sessions array detected");
             sessionData = response.data.data.sessions;
           } else if (response.data.data) {
-            // If it's an object but not with a sessions prop, it might be the data itself
             console.log(
               "Possible object response detected:",
               response.data.data
@@ -97,14 +93,12 @@ const SessionsPage = () => {
     fetchSessions();
   }, [activeTab, currentUser.role]);
 
-  // Fetch calendar sessions
   useEffect(() => {
     const fetchCalendarSessions = async () => {
       if (view !== "calendar") return;
 
       setCalendarLoading(true);
       try {
-        // Get 2 weeks range
         const today = new Date();
         const startDate = new Date(today);
         startDate.setDate(today.getDate() - 7);
@@ -118,7 +112,6 @@ const SessionsPage = () => {
         );
 
         if (response.data.success) {
-          // Transform the sessions data for the calendar
           const calendarEvents = response.data.data.map((session) => ({
             id: session._id,
             title:
@@ -146,7 +139,6 @@ const SessionsPage = () => {
     fetchCalendarSessions();
   }, [view, currentUser.role]);
 
-  // Fetch session stats
   useEffect(() => {
     const fetchSessionStats = async () => {
       try {
@@ -164,7 +156,6 @@ const SessionsPage = () => {
     fetchSessionStats();
   }, []);
 
-  // Format date for display
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       weekday: "short",
@@ -173,7 +164,6 @@ const SessionsPage = () => {
     });
   };
 
-  // Get status badge class
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case "pending":

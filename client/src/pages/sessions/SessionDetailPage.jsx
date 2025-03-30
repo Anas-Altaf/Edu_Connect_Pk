@@ -51,7 +51,7 @@ const SessionDetailPage = () => {
 
       if (response?.data.success) {
         toast.success("Session status updated successfully!");
-        // Refresh the session data
+
         const refreshResponse = await sessionAPI.getSessionDetails(id);
         if (refreshResponse.data.success) {
           setSession(refreshResponse.data.data);

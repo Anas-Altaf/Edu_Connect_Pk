@@ -10,7 +10,6 @@ export const NotificationProvider = ({ children }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Fetch notifications whenever the user changes
   useEffect(() => {
     if (!currentUser) {
       setNotifications([]);
@@ -25,7 +24,6 @@ export const NotificationProvider = ({ children }) => {
         if (response.data.success) {
           setNotifications(response.data.data || []);
 
-          // Count unread notifications
           const unreadNotifications = response.data.data.filter(
             (n) => !n.isRead
           ).length;
@@ -40,18 +38,15 @@ export const NotificationProvider = ({ children }) => {
 
     fetchNotifications();
 
-    // Set up polling for notifications
-    const interval = setInterval(fetchNotifications, 60000); // Check every minute
+    const interval = setInterval(fetchNotifications, 60000);
 
     return () => clearInterval(interval);
   }, [currentUser]);
 
-  // Mark a notification as read
   const markAsRead = async (notificationId) => {
     try {
       await notificationAPI.markAsRead(notificationId);
 
-      // Update local state
       setNotifications((prevNotifications) =>
         prevNotifications.map((notification) =>
           notification._id === notificationId
@@ -60,7 +55,6 @@ export const NotificationProvider = ({ children }) => {
         )
       );
 
-      // Update unread count
       setUnreadCount((prevCount) => Math.max(0, prevCount - 1));
 
       return true;
@@ -70,12 +64,10 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
-  // Mark all notifications as read
   const markAllAsRead = async () => {
     try {
       await notificationAPI.markAllAsRead();
 
-      // Update local state
       setNotifications((prevNotifications) =>
         prevNotifications.map((notification) => ({
           ...notification,
@@ -83,7 +75,6 @@ export const NotificationProvider = ({ children }) => {
         }))
       );
 
-      // Reset unread count
       setUnreadCount(0);
 
       return true;
@@ -93,24 +84,20 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
-  // Delete a notification
   const deleteNotification = async (notificationId) => {
     try {
       await notificationAPI.deleteNotification(notificationId);
 
-      // Check if the notification was unread before removing
       const wasUnread = notifications.find(
         (n) => n._id === notificationId && !n.isRead
       );
 
-      // Update local state
       setNotifications((prevNotifications) =>
         prevNotifications.filter(
           (notification) => notification._id !== notificationId
         )
       );
 
-      // Update unread count if needed
       if (wasUnread) {
         setUnreadCount((prevCount) => Math.max(0, prevCount - 1));
       }
@@ -138,5 +125,4 @@ export const NotificationProvider = ({ children }) => {
   );
 };
 
-// Custom hook for using notifications
 export const useNotifications = () => useContext(NotificationContext);
