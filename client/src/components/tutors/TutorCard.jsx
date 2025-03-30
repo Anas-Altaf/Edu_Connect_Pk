@@ -30,9 +30,9 @@ const TutorCard = ({ tutor, inWishlist, showBookButton, onToggleWishlist }) => {
   const handleWishlistToggle = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (isToggling || !onToggleWishlist) return;
-    
+
     setIsToggling(true);
     try {
       await onToggleWishlist(tutor._id);
@@ -96,8 +96,8 @@ const TutorCard = ({ tutor, inWishlist, showBookButton, onToggleWishlist }) => {
       </div>
       <div className="tutor-footer">
         {onToggleWishlist && (
-          <button 
-            className={`wishlist-btn ${inWishlist ? 'active' : ''}`} 
+          <button
+            className={`wishlist-btn ${inWishlist ? "active" : ""}`}
             onClick={handleWishlistToggle}
             disabled={isToggling}
           >

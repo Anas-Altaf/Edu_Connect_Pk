@@ -3,12 +3,11 @@ import React, { createContext, useState, useEffect } from "react";
 export const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  // Check if user has a theme preference saved in localStorage
-  // or use the system preference as default
+  // Check if theme is stored in localStorage, otherwise use system preference
   const getInitialTheme = () => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme) {
-      return savedTheme;
+    const storedTheme = localStorage.getItem("theme");
+    if (storedTheme) {
+      return storedTheme;
     }
 
     // Check system preference
@@ -20,17 +19,12 @@ export const ThemeProvider = ({ children }) => {
 
   const [theme, setTheme] = useState(getInitialTheme);
 
-  // Apply theme when it changes
+  // Apply theme to document
   useEffect(() => {
-    // Remove both classes first
-    document.body.classList.remove("light", "dark");
-    // Add the current theme class
-    document.body.classList.add(theme);
-    // Save to localStorage
+    document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  // Toggle between light and dark themes
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };

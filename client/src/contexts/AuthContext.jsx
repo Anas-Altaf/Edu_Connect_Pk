@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser(null);
   };
 
-  // New method to update the current user data
+  // Update the current user data
   const updateCurrentUser = (userData) => {
     setCurrentUser((prev) => ({
       ...prev,

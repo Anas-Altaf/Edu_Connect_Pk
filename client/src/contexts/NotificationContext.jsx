@@ -1,6 +1,6 @@
-import { createContext, useState, useEffect, useContext } from "react";
-import { AuthContext } from "./AuthContext";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import { notificationAPI } from "../services/api";
+import { AuthContext } from "./AuthContext";
 
 export const NotificationContext = createContext();
 
@@ -9,156 +9,117 @@ export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Fetch notifications when user logs in
+  // Fetch notifications whenever the user changes
   useEffect(() => {
-    const fetchNotifications = async () => {
-      if (!currentUser) {
-        setNotifications([]);
-        setUnreadCount(0);
-        return;
-      }
+    if (!currentUser) {
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
+    }
 
+    const fetchNotifications = async () => {
       setLoading(true);
       try {
         const response = await notificationAPI.getNotifications(1, 10);
         if (response.data.success) {
-          // Map the backend "isRead" field to "read" for front-end consistency
-          const fetchedNotifications = response.data.data.map((n) => ({
-            ...n,
-            read: n.isRead,
-          }));
-          setNotifications(fetchedNotifications);
+          setNotifications(response.data.data || []);
 
           // Count unread notifications
-          const unread = fetchedNotifications.filter(
-            (notification) => !notification.read
+          const unreadNotifications = response.data.data.filter(
+            (n) => !n.isRead
           ).length;
-          setUnreadCount(unread);
+          setUnreadCount(unreadNotifications);
         }
       } catch (err) {
-        console.error("Failed to fetch notifications:", err);
-        setError("Failed to load notifications");
+        console.error("Error fetching notifications:", err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchNotifications();
+
+    // Set up polling for notifications
+    const interval = setInterval(fetchNotifications, 60000); // Check every minute
+
+    return () => clearInterval(interval);
   }, [currentUser]);
 
-  // Poll for new notifications every minute
-  useEffect(() => {
-    if (!currentUser) return;
-
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await notificationAPI.getNotifications(1, 10);
-        if (response.data.success) {
-          const newNotifications = response.data.data;
-
-          // Check if there are new notifications
-          if (
-            newNotifications.length > notifications.length ||
-            newNotifications.some((newNotif) => {
-              return !notifications.some(
-                (oldNotif) => oldNotif._id === newNotif._id
-              );
-            })
-          ) {
-            setNotifications(newNotifications);
-
-            // Update unread count
-            const unread = newNotifications.filter(
-              (notification) => !notification.read
-            ).length;
-            setUnreadCount(unread);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to poll notifications:", err);
-      }
-    }, 60000); // Poll every minute
-
-    return () => clearInterval(pollInterval);
-  }, [currentUser, notifications]);
-
-  // Mark notification as read
-  const markAsRead = async (id) => {
+  // Mark a notification as read
+  const markAsRead = async (notificationId) => {
     try {
-      await notificationAPI.markAsRead(id);
+      await notificationAPI.markAsRead(notificationId);
 
+      // Update local state
       setNotifications((prevNotifications) =>
         prevNotifications.map((notification) =>
-          notification._id === id
-            ? { ...notification, read: true }
+          notification._id === notificationId
+            ? { ...notification, isRead: true }
             : notification
         )
       );
 
+      // Update unread count
       setUnreadCount((prevCount) => Math.max(0, prevCount - 1));
-    } catch (err) {
-      console.error("Failed to mark notification as read:", err);
+
+      return true;
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      return false;
     }
   };
 
   // Mark all notifications as read
   const markAllAsRead = async () => {
     try {
-      const unreadNotifications = notifications.filter((n) => !n.read);
+      await notificationAPI.markAllAsRead();
 
-      // Create an array of promises for marking each notification as read
-      const readPromises = unreadNotifications.map((notification) =>
-        notificationAPI.markAsRead(notification._id)
-      );
-
-      // Wait for all promises to resolve
-      await Promise.all(readPromises);
-
-      // Update state
+      // Update local state
       setNotifications((prevNotifications) =>
         prevNotifications.map((notification) => ({
           ...notification,
-          read: true,
+          isRead: true,
         }))
       );
 
+      // Reset unread count
       setUnreadCount(0);
-    } catch (err) {
-      console.error("Failed to mark all notifications as read:", err);
+
+      return true;
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      return false;
     }
   };
 
-  // Delete notification
-  const deleteNotification = async (id) => {
+  // Delete a notification
+  const deleteNotification = async (notificationId) => {
     try {
-      await notificationAPI.deleteNotification(id);
+      await notificationAPI.deleteNotification(notificationId);
 
-      const deletedNotification = notifications.find((n) => n._id === id);
-      const wasUnread = deletedNotification && !deletedNotification.read;
-
-      setNotifications((prevNotifications) =>
-        prevNotifications.filter((notification) => notification._id !== id)
+      // Check if the notification was unread before removing
+      const wasUnread = notifications.find(
+        (n) => n._id === notificationId && !n.isRead
       );
 
+      // Update local state
+      setNotifications((prevNotifications) =>
+        prevNotifications.filter(
+          (notification) => notification._id !== notificationId
+        )
+      );
+
+      // Update unread count if needed
       if (wasUnread) {
         setUnreadCount((prevCount) => Math.max(0, prevCount - 1));
       }
-    } catch (err) {
-      console.error("Failed to delete notification:", err);
+
+      return true;
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      return false;
     }
-  };
-
-  // Toggle dropdown
-  const toggleDropdown = () => {
-    setDropdownOpen((prev) => !prev);
-  };
-
-  // Close dropdown
-  const closeDropdown = () => {
-    setDropdownOpen(false);
   };
 
   return (
@@ -167,10 +128,6 @@ export const NotificationProvider = ({ children }) => {
         notifications,
         unreadCount,
         loading,
-        error,
-        dropdownOpen,
-        toggleDropdown,
-        closeDropdown,
         markAsRead,
         markAllAsRead,
         deleteNotification,
@@ -180,3 +137,6 @@ export const NotificationProvider = ({ children }) => {
     </NotificationContext.Provider>
   );
 };
+
+// Custom hook for using notifications
+export const useNotifications = () => useContext(NotificationContext);

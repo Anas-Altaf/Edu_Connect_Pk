@@ -36,14 +36,14 @@ const WishlistPage = () => {
 
   const handleToggleWishlist = async (tutorId) => {
     try {
-      await wishlistAPI.removeTutorFromWishlist(tutorId);
-      setWishlistTutors(
-        wishlistTutors.filter((tutor) => tutor._id !== tutorId)
+      await wishlistAPI.removeFromWishlist(tutorId);
+      setWishlistTutors((prev) =>
+        prev.filter((tutor) => tutor._id !== tutorId)
       );
       toast.success("Removed from wishlist");
     } catch (err) {
-      console.error("Wishlist operation error:", err);
-      toast.error("Failed to update wishlist");
+      console.error("Wishlist remove error:", err);
+      toast.error("Failed to remove from wishlist");
     }
   };
 

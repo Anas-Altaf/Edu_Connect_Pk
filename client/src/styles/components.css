@@ -699,6 +699,34 @@
   padding: 2rem 1rem;
 }
 
+/* Wishlist Button */
+.wishlist-btn {
+  background-color: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wishlist-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+.wishlist-btn.active {
+  color: var(--danger);
+}
+
+.wishlist-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* DateTimePicker Component */
 .date-time-picker {
   display: flex;
