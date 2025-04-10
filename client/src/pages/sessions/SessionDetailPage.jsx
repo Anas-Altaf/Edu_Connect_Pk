@@ -163,6 +163,12 @@ const SessionDetailPage = () => {
                 </span>
               </div>
               <div className="detail-item">
+                <span className="detail-label">Subject</span>
+                <span className="detail-value">
+                  {session.subject || "General"}
+                </span>
+              </div>
+              <div className="detail-item">
                 <span className="detail-label">Amount</span>
                 <span className="detail-value">Rs. {session.amount}</span>
               </div>

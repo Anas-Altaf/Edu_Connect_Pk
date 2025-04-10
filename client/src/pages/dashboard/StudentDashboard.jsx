@@ -133,6 +133,9 @@ const StudentDashboard = () => {
                     <span className="tutor-name">
                       {session.tutorId?.userId?.name || "Tutor"}
                     </span>
+                    <span className="session-subject">
+                      {session.subject || "General tutoring"}
+                    </span>
                     <span className="session-type">
                       {session.type === "online" ? "Online" : "In-person"}{" "}
                       session
