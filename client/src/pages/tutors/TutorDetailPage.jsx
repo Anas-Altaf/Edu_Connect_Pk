@@ -84,6 +84,14 @@ const TutorDetailPage = () => {
       return;
     }
 
+    // Debug the tutor ID
+    console.log("Booking session with tutor ID:", id);
+
+    if (!id) {
+      toast.error("Invalid tutor ID");
+      return;
+    }
+
     navigate(`/sessions/book/${id}`);
   };
 

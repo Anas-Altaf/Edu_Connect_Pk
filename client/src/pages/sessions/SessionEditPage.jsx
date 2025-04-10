@@ -17,6 +17,7 @@ const SessionEditPage = () => {
     date: "",
     timeSlot: "",
     type: "online",
+    subject: "",
   });
 
   const [originalSession, setOriginalSession] = useState(null);
@@ -58,6 +59,7 @@ const SessionEditPage = () => {
             date: new Date(sessionData.date).toISOString().split("T")[0],
             timeSlot: sessionData.timeSlot,
             type: sessionData.type,
+            subject: sessionData.subject || "General",
           });
         } else {
           setError("Failed to load session details");
@@ -176,6 +178,18 @@ const SessionEditPage = () => {
               <option value="online">Online</option>
               <option value="in-person">In-Person</option>
             </select>
+          </div>
+          <div className="form-control">
+            <label htmlFor="subject">Subject</label>
+            <input
+              type="text"
+              id="subject"
+              name="subject"
+              className="input"
+              value={formData.subject}
+              onChange={handleChange}
+              placeholder="Enter subject"
+            />
           </div>
           {error && <div className="alert alert-danger">{error}</div>}
           <div className="form-actions">

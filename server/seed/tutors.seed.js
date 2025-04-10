@@ -1,14 +1,11 @@
 import { Tutor } from "../models/index.js";
 
 export const seedTutors = async (users) => {
-  // Filter out tutor users
   const tutorUsers = users.filter((user) => user.role === "tutor");
 
-  // Create tutor profiles data
   const tutorsData = tutorUsers.map((user) => {
     let subjects, hourlyRate, qualifications;
 
-    // Different data based on tutor name to provide variety
     switch (user.name) {
       case "Dr. Imran Ahmad":
         subjects = ["Mathematics", "Calculus", "Algebra"];
@@ -51,19 +48,17 @@ export const seedTutors = async (users) => {
       location: user.location,
       availability: generateAvailability(),
       isVerified: true,
-      averageRating: (Math.random() * 2 + 3).toFixed(1), // Random between 3-5
+      averageRating: (Math.random() * 2 + 3).toFixed(1),
       earnings: Math.floor(Math.random() * 50000),
     };
   });
 
-  // Insert all tutor profiles into database
   const tutors = await Tutor.insertMany(tutorsData);
   console.log(`${tutors.length} tutor profiles created`);
 
   return tutors;
 };
 
-// Helper function to generate random weekly availability
 function generateAvailability() {
   const days = [
     "Monday",
@@ -76,18 +71,15 @@ function generateAvailability() {
   ];
   const availability = [];
 
-  // Generate 3-5 available slots per week
   for (let i = 0; i < Math.floor(Math.random() * 3) + 3; i++) {
     const day = days[Math.floor(Math.random() * days.length)];
 
-    // Generate a time slot
-    const startHour = Math.floor(Math.random() * 12) + 9; // Between 9 AM and 8 PM
-    const endHour = Math.min(startHour + 1 + Math.floor(Math.random() * 3), 22); // 1-3 hours long, end by 10 PM
+    const startHour = Math.floor(Math.random() * 12) + 9;
+    const endHour = Math.min(startHour + 1 + Math.floor(Math.random() * 3), 22);
 
     const startTime = `${String(startHour).padStart(2, "0")}:00`;
     const endTime = `${String(endHour).padStart(2, "0")}:00`;
 
-    // Only add if not already added for this day
     if (!availability.find((slot) => slot.day === day)) {
       availability.push({
         day,

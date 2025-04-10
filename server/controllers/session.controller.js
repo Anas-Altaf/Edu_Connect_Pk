@@ -1,15 +1,29 @@
 import { Session, Tutor } from "../models/index.js";
 
-// Book a session – updated to work with startTime and endTime
 export const bookSession = async (req, res, next) => {
   try {
-    const { tutorId, date, start, end, type, notes } = req.body;
+    const { tutorId, date, start, end, type, subject, notes } = req.body;
 
-    // Verify the student is booking
     if (req.user.role !== "student") {
       return res.status(403).json({
         success: false,
         message: "Only students can book sessions",
+      });
+    }
+
+    // Validate tutorId
+    if (!tutorId || tutorId === "undefined" || tutorId === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid tutor ID",
+      });
+    }
+
+    // Validate MongoDB ObjectId format
+    if (!/^[0-9a-fA-F]{24}$/.test(tutorId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid tutor ID format",
       });
     }
 
@@ -21,7 +35,6 @@ export const bookSession = async (req, res, next) => {
       });
     }
 
-    // Validate the date is in the future
     const sessionDate = new Date(date);
     if (isNaN(sessionDate.getTime())) {
       return res.status(400).json({
@@ -37,7 +50,6 @@ export const bookSession = async (req, res, next) => {
       });
     }
 
-    // Parse time strings and ensure they are valid
     if (
       !start ||
       !end ||
@@ -50,14 +62,11 @@ export const bookSession = async (req, res, next) => {
       });
     }
 
-    // Create properly formatted date strings
-    const dateStr = sessionDate.toISOString().split("T")[0]; // YYYY-MM-DD format
+    const dateStr = sessionDate.toISOString().split("T")[0];
 
-    // Create Date objects for startTime and endTime
     const startTime = new Date(`${dateStr}T${start}`);
     const endTime = new Date(`${dateStr}T${end}`);
 
-    // Validate the dates
     if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
       return res.status(400).json({
         success: false,
@@ -66,7 +75,6 @@ export const bookSession = async (req, res, next) => {
       });
     }
 
-    // Check that endTime is after startTime
     if (endTime <= startTime) {
       return res.status(400).json({
         success: false,
@@ -74,10 +82,8 @@ export const bookSession = async (req, res, next) => {
       });
     }
 
-    // Store the timeSlot for compatibility with existing code
     const timeSlot = `${start}-${end}`;
 
-    // Check if slot is already booked
     const existingSession = await Session.findOne({
       tutorId,
       date: sessionDate,
@@ -98,15 +104,15 @@ export const bookSession = async (req, res, next) => {
       });
     }
 
-    // Create session
     const session = await Session.create({
       studentId: req.user._id,
       tutorId,
       date: sessionDate,
-      timeSlot, // Added for backward compatibility
+      timeSlot,
       startTime,
       endTime,
       type,
+      subject: subject || "General",
       amount: tutor.hourlyRate,
       status: "pending",
       paymentStatus: "pending",
@@ -125,10 +131,8 @@ export const bookSession = async (req, res, next) => {
   }
 };
 
-// Get all sessions for a student
 export const getStudentSessions = async (req, res, next) => {
   try {
-    // Verify the requester is the student or an admin
     if (req.user.role !== "student" && req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -139,12 +143,10 @@ export const getStudentSessions = async (req, res, next) => {
     const studentId = req.params.id || req.user._id;
     console.log("Getting sessions for student:", studentId);
 
-    // Get sessions with pagination
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
 
-    // Filter options
     const query = { studentId };
     if (req.query.status) {
       query.status = req.query.status;
@@ -182,13 +184,10 @@ export const getStudentSessions = async (req, res, next) => {
   }
 };
 
-// Get all sessions for a tutor
 export const getTutorSessions = async (req, res, next) => {
   try {
-    // Verify the requester is the tutor or an admin
     const requestedTutorId = req.params.id;
 
-    // If user is a tutor, find their tutor record
     let tutorRecord = null;
     if (req.user.role === "tutor") {
       tutorRecord = await Tutor.findOne({ userId: req.user._id });
@@ -204,7 +203,6 @@ export const getTutorSessions = async (req, res, next) => {
         });
       }
 
-      // Check if they're requesting their own sessions
       if (requestedTutorId && requestedTutorId !== tutorRecord._id.toString()) {
         return res.status(403).json({
           success: false,
@@ -218,16 +216,13 @@ export const getTutorSessions = async (req, res, next) => {
       });
     }
 
-    // Use the tutor's ID from their record or the requested ID
     const tutorId = tutorRecord ? tutorRecord._id : requestedTutorId;
     console.log("Getting sessions for tutor:", tutorId);
 
-    // Get sessions with pagination
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
 
-    // Filter options
     const query = { tutorId };
     if (req.query.status) {
       query.status = req.query.status;
@@ -262,13 +257,11 @@ export const getTutorSessions = async (req, res, next) => {
   }
 };
 
-// Update a session (reschedule/cancel)
 export const updateSession = async (req, res, next) => {
   try {
     const { date, timeSlot, type, status } = req.body;
     const sessionId = req.params.id;
 
-    // Find the session
     const session = await Session.findById(sessionId);
 
     if (!session) {
@@ -278,12 +271,10 @@ export const updateSession = async (req, res, next) => {
       });
     }
 
-    // Check authorization
     const isStudent = req.user._id.toString() === session.studentId.toString();
-    let isTutor = false; // We'll check this if needed
+    let isTutor = false;
 
     if (!isStudent && req.user.role !== "admin") {
-      // If not student, check if it's the tutor
       const tutorRecord = await Tutor.findOne({ userId: req.user._id });
 
       if (
@@ -299,9 +290,7 @@ export const updateSession = async (req, res, next) => {
       }
     }
 
-    // Different rules for students vs tutors
     if (isStudent) {
-      // Students can only reschedule/cancel if session is pending or confirmed
       if (!["pending", "confirmed"].includes(session.status)) {
         return res.status(400).json({
           success: false,
@@ -309,9 +298,7 @@ export const updateSession = async (req, res, next) => {
         });
       }
 
-      // If rescheduling
       if (date || timeSlot) {
-        // Check if new time is available
         const newDate = date ? new Date(date) : session.date;
         const newTimeSlot = timeSlot || session.timeSlot;
 
@@ -334,16 +321,12 @@ export const updateSession = async (req, res, next) => {
         if (timeSlot) session.timeSlot = newTimeSlot;
       }
 
-      // If changing type
       if (type) session.type = type;
 
-      // If canceling
       if (status === "canceled") {
         session.status = "canceled";
-        // Logic for refund could go here
       }
     } else if (isTutor || req.user.role === "admin") {
-      // Tutors can approve/reject pending sessions or mark as completed
       if (status) {
         if (status === "confirmed" && session.status === "pending") {
           session.isApproved = true;
@@ -351,7 +334,6 @@ export const updateSession = async (req, res, next) => {
         } else if (status === "completed" && session.status === "confirmed") {
           session.status = "completed";
 
-          // Update tutor earnings
           const tutor = await Tutor.findById(session.tutorId);
           tutor.earnings += session.amount;
           await tutor.save();
@@ -381,12 +363,10 @@ export const updateSession = async (req, res, next) => {
   }
 };
 
-// Cancel a session
 export const cancelSession = async (req, res, next) => {
   try {
     const sessionId = req.params.id;
 
-    // Find the session
     const session = await Session.findById(sessionId);
 
     if (!session) {
@@ -396,12 +376,10 @@ export const cancelSession = async (req, res, next) => {
       });
     }
 
-    // Check authorization
     const isStudent = req.user._id.toString() === session.studentId.toString();
-    let isTutor = false;
 
+    // Check if user is authorized to cancel the session
     if (!isStudent && req.user.role !== "admin") {
-      // If not student, check if it's the tutor
       const tutorRecord = await Tutor.findOne({ userId: req.user._id });
 
       if (
@@ -412,12 +390,10 @@ export const cancelSession = async (req, res, next) => {
           success: false,
           message: "You are not authorized to cancel this session",
         });
-      } else {
-        isTutor = true;
       }
+      // User is authorized as the tutor for this session
     }
 
-    // Can only cancel pending or confirmed sessions
     if (!["pending", "confirmed"].includes(session.status)) {
       return res.status(400).json({
         success: false,
@@ -437,7 +413,6 @@ export const cancelSession = async (req, res, next) => {
   }
 };
 
-// Approve or decline a session request (for tutors)
 export const handleSessionApproval = async (req, res, next) => {
   try {
     const { isApproved } = req.body;
@@ -450,7 +425,6 @@ export const handleSessionApproval = async (req, res, next) => {
       });
     }
 
-    // Find the session
     const session = await Session.findById(sessionId);
 
     if (!session) {
@@ -460,7 +434,6 @@ export const handleSessionApproval = async (req, res, next) => {
       });
     }
 
-    // Ensure the requester is the tutor for this session
     const tutorRecord = await Tutor.findOne({ userId: req.user._id });
 
     if (
@@ -473,7 +446,6 @@ export const handleSessionApproval = async (req, res, next) => {
       });
     }
 
-    // Can only approve/decline pending sessions
     if (session.status !== "pending") {
       return res.status(400).json({
         success: false,
@@ -500,12 +472,10 @@ export const handleSessionApproval = async (req, res, next) => {
   }
 };
 
-// Mark a session as completed (for tutors)
 export const completeSession = async (req, res, next) => {
   try {
     const sessionId = req.params.id;
 
-    // Find the session
     const session = await Session.findById(sessionId);
 
     if (!session) {
@@ -515,7 +485,6 @@ export const completeSession = async (req, res, next) => {
       });
     }
 
-    // Ensure the requester is the tutor for this session
     const tutorRecord = await Tutor.findOne({ userId: req.user._id });
 
     if (
@@ -528,7 +497,6 @@ export const completeSession = async (req, res, next) => {
       });
     }
 
-    // Can only complete confirmed sessions
     if (session.status !== "confirmed") {
       return res.status(400).json({
         success: false,
@@ -538,11 +506,9 @@ export const completeSession = async (req, res, next) => {
 
     session.status = "completed";
 
-    // Update tutor earnings
     tutorRecord.earnings += session.amount;
     await tutorRecord.save();
 
-    // Mark payment as completed
     session.paymentStatus = "completed";
 
     await session.save();
@@ -557,10 +523,8 @@ export const completeSession = async (req, res, next) => {
   }
 };
 
-// Get earnings summary for a tutor
 export const getEarningsSummary = async (req, res, next) => {
   try {
-    // Find the tutor
     let tutorId;
 
     if (req.user.role === "tutor") {
@@ -583,17 +547,14 @@ export const getEarningsSummary = async (req, res, next) => {
       });
     }
 
-    // Get total earnings
     const totalEarnings = await Tutor.findById(tutorId).select("earnings");
 
-    // Get completed sessions
     const completedSessions = await Session.find({
       tutorId,
       status: "completed",
       paymentStatus: "completed",
     });
 
-    // Calculate weekly earnings
     const now = new Date();
     const oneWeekAgo = new Date(now);
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -602,7 +563,6 @@ export const getEarningsSummary = async (req, res, next) => {
       .filter((session) => new Date(session.updatedAt) >= oneWeekAgo)
       .reduce((sum, session) => sum + session.amount, 0);
 
-    // Calculate monthly earnings
     const oneMonthAgo = new Date(now);
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
@@ -624,7 +584,6 @@ export const getEarningsSummary = async (req, res, next) => {
   }
 };
 
-// Check time slot availability
 export const checkAvailability = async (req, res, next) => {
   try {
     const { tutorId, date, timeSlot } = req.query;
@@ -636,7 +595,22 @@ export const checkAvailability = async (req, res, next) => {
       });
     }
 
-    // Parse the date
+    // Validate tutorId
+    if (!tutorId || tutorId === "undefined" || tutorId === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid tutor ID",
+      });
+    }
+
+    // Validate MongoDB ObjectId format
+    if (!/^[0-9a-fA-F]{24}$/.test(tutorId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid tutor ID format",
+      });
+    }
+
     const sessionDate = new Date(date);
     if (isNaN(sessionDate.getTime())) {
       return res.status(400).json({
@@ -645,7 +619,6 @@ export const checkAvailability = async (req, res, next) => {
       });
     }
 
-    // Parse timeSlot to get start and end times
     const [startStr, endStr] = timeSlot.split("-");
     if (!startStr || !endStr) {
       return res.status(400).json({
@@ -654,14 +627,11 @@ export const checkAvailability = async (req, res, next) => {
       });
     }
 
-    // Format date string for consistency
     const dateStr = sessionDate.toISOString().split("T")[0];
 
-    // Create Date objects
     const startTime = new Date(`${dateStr}T${startStr}`);
     const endTime = new Date(`${dateStr}T${endStr}`);
 
-    // Validate the times
     if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
       return res.status(400).json({
         success: false,
@@ -669,7 +639,6 @@ export const checkAvailability = async (req, res, next) => {
       });
     }
 
-    // Check if slot is already booked, but using timeSlot field for backward compatibility
     const existingSession = await Session.findOne({
       tutorId,
       date: sessionDate,
@@ -693,7 +662,6 @@ export const checkAvailability = async (req, res, next) => {
   }
 };
 
-// Get sessions in calendar format
 export const getCalendarSessions = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
@@ -708,7 +676,6 @@ export const getCalendarSessions = async (req, res, next) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    // Find sessions based on user role
     let query = {};
 
     if (req.user.role === "student") {
@@ -733,7 +700,6 @@ export const getCalendarSessions = async (req, res, next) => {
 
     query.date = { $gte: start, $lte: end };
 
-    // Get sessions
     const sessions = await Session.find(query)
       .populate({
         path: "studentId",
@@ -747,7 +713,6 @@ export const getCalendarSessions = async (req, res, next) => {
         },
       });
 
-    // Format for calendar
     const calendarEvents = sessions.map((session) => ({
       id: session._id,
       title:
@@ -774,7 +739,6 @@ export const getCalendarSessions = async (req, res, next) => {
   }
 };
 
-// Get session statistics
 export const getSessionStats = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -783,7 +747,6 @@ export const getSessionStats = async (req, res, next) => {
     let matchCriteria;
 
     if (role === "tutor") {
-      // Get the tutor document ID
       const tutor = await Tutor.findOne({ userId });
       if (!tutor) {
         return res.status(404).json({
@@ -802,7 +765,6 @@ export const getSessionStats = async (req, res, next) => {
       });
     }
 
-    // Count sessions by status
     const upcoming = await Session.countDocuments({
       ...matchCriteria,
       status: "confirmed",
@@ -833,7 +795,6 @@ export const getSessionStats = async (req, res, next) => {
   }
 };
 
-// Get session details
 export const getSessionDetails = async (req, res, next) => {
   try {
     const session = await Session.findById(req.params.id)

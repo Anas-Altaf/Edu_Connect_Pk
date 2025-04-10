@@ -6,7 +6,7 @@ import Loader from "../../components/ui/Loader";
 import { toast } from "react-toastify";
 
 const SessionBookingPage = () => {
-  const { id: tutorId } = useParams();
+  const { tutorId } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
 
@@ -19,10 +19,14 @@ const SessionBookingPage = () => {
     date: "",
     timeSlot: "",
     type: "online",
+    subject: "",
     notes: "",
   });
 
   useEffect(() => {
+    // Debug the tutorId
+    console.log("TutorId from params:", tutorId);
+
     if (!currentUser) {
       navigate("/auth/login");
       return;
@@ -30,6 +34,25 @@ const SessionBookingPage = () => {
 
     if (currentUser.role !== "student") {
       navigate("/unauthorized");
+      return;
+    }
+
+    // Validate tutorId
+    console.log("Validating tutorId:", tutorId);
+    console.log("tutorId type:", typeof tutorId);
+
+    if (!tutorId || tutorId === "undefined" || tutorId === undefined) {
+      console.error("Invalid tutorId detected:", tutorId);
+      setError("Invalid tutor ID. Please go back and try again.");
+      setLoading(false);
+      return;
+    }
+
+    // Try to parse the tutorId to ensure it's a valid MongoDB ObjectId
+    if (!/^[0-9a-fA-F]{24}$/.test(tutorId)) {
+      console.error("Invalid MongoDB ObjectId format:", tutorId);
+      setError("Invalid tutor ID format. Please go back and try again.");
+      setLoading(false);
       return;
     }
 
@@ -62,6 +85,14 @@ const SessionBookingPage = () => {
 
     if (!formData.date || !formData.timeSlot) {
       toast.error("Please select a date and time slot");
+      return;
+    }
+
+    // Validate tutorId before proceeding
+    if (!tutorId || tutorId === "undefined") {
+      toast.error(
+        "Invalid tutor ID. Please try again or select a different tutor."
+      );
       return;
     }
 
@@ -101,6 +132,7 @@ const SessionBookingPage = () => {
         start: formattedStart,
         end: formattedEnd,
         type: formData.type,
+        subject: formData.subject,
         notes: formData.notes,
       });
 
@@ -136,9 +168,17 @@ const SessionBookingPage = () => {
     return (
       <div className="error-container">
         <div className="alert alert-danger">{error || "Tutor not found"}</div>
-        <button onClick={() => navigate("/tutors")} className="btn btn-primary">
-          Back to Tutors
-        </button>
+        <div className="error-actions">
+          <button onClick={() => navigate(-1)} className="btn btn-outline">
+            Go Back
+          </button>
+          <button
+            onClick={() => navigate("/tutors")}
+            className="btn btn-primary"
+          >
+            Browse All Tutors
+          </button>
+        </div>
       </div>
     );
   }
@@ -264,6 +304,26 @@ const SessionBookingPage = () => {
                   </label>
                 </div>
               </div>
+
+              <div className="form-control">
+                <label htmlFor="subject">Subject</label>
+                <select
+                  id="subject"
+                  name="subject"
+                  className="input"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select a subject</option>
+                  {tutor?.subjects?.map((subject, index) => (
+                    <option key={index} value={subject}>
+                      {subject}
+                    </option>
+                  ))}
+                  <option value="General">General Tutoring</option>
+                </select>
+              </div>
             </div>
 
             <div className="form-section">
@@ -300,6 +360,12 @@ const SessionBookingPage = () => {
                     <span className="summary-label">Type</span>
                     <span className="summary-value">
                       {formData.type === "online" ? "Online" : "In-person"}
+                    </span>
+                  </div>
+                  <div className="summary-item">
+                    <span className="summary-label">Subject</span>
+                    <span className="summary-value">
+                      {formData.subject || "Not selected"}
                     </span>
                   </div>
                   <div className="summary-item">

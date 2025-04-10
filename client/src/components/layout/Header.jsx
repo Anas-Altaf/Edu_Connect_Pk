@@ -31,12 +31,10 @@ const Header = () => {
     toast.success("Logged out successfully");
   };
 
-  // Toggle notifications dropdown
   const toggleNotifications = () => {
     setNotificationsOpen(!notificationsOpen);
   };
 
-  // Close notifications when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -53,12 +51,10 @@ const Header = () => {
     };
   }, []);
 
-  // Mark notification as read
   const handleNotificationClick = async (id) => {
     try {
       await markAsRead(id);
 
-      // Find the notification and navigate based on its link
       const notification = notifications.find((n) => n._id === id);
       if (notification?.link) {
         navigate(notification.link);
@@ -70,7 +66,6 @@ const Header = () => {
     }
   };
 
-  // Delete notification
   const handleDeleteNotification = async (e, id) => {
     e.stopPropagation();
     try {
@@ -82,11 +77,9 @@ const Header = () => {
     }
   };
 
-  // Define navbar links based on user role
   const getNavLinks = () => {
     const commonLinks = [{ path: "/", label: "Home" }];
 
-    // Add "Find Tutors" only for non-tutors (students and not logged in users)
     if (!currentUser || currentUser.role === "student") {
       commonLinks.push({ path: "/tutors", label: "Find Tutors" });
     }
@@ -118,7 +111,6 @@ const Header = () => {
 
   const navLinks = getNavLinks();
 
-  // Get user initials for avatar
   const getUserInitials = (name) => {
     if (!name) return "?";
     return name

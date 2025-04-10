@@ -1,9 +1,7 @@
 import { Report, Session, Tutor, User } from "../models/index.js";
 
-// Get all reports (filtered by type)
 export const getAllReports = async (req, res, next) => {
   try {
-    // Verify user is admin
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -13,11 +11,9 @@ export const getAllReports = async (req, res, next) => {
 
     const { type } = req.query;
 
-    // Build query
     const query = {};
     if (type) query.type = type;
 
-    // Pagination
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
@@ -42,10 +38,8 @@ export const getAllReports = async (req, res, next) => {
   }
 };
 
-// Generate a new report
 export const generateReport = async (req, res, next) => {
   try {
-    // Verify user is admin
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -67,7 +61,6 @@ export const generateReport = async (req, res, next) => {
 
     let reportData = {};
 
-    // Generate different types of reports
     switch (type) {
       case "subject_popularity":
         reportData = await generateSubjectPopularityReport(start, end);
@@ -110,10 +103,8 @@ export const generateReport = async (req, res, next) => {
   }
 };
 
-// Get subject popularity report
 export const getSubjectsReport = async (req, res, next) => {
   try {
-    // Verify user is admin
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -124,7 +115,7 @@ export const getSubjectsReport = async (req, res, next) => {
     const { startDate, endDate } = req.query;
     const start = startDate
       ? new Date(startDate)
-      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Last 30 days
+      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate) : new Date();
 
     const reportData = await generateSubjectPopularityReport(start, end);
@@ -138,10 +129,8 @@ export const getSubjectsReport = async (req, res, next) => {
   }
 };
 
-// Get session completion report
 export const getSessionsReport = async (req, res, next) => {
   try {
-    // Verify user is admin
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -152,7 +141,7 @@ export const getSessionsReport = async (req, res, next) => {
     const { startDate, endDate } = req.query;
     const start = startDate
       ? new Date(startDate)
-      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Last 30 days
+      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate) : new Date();
 
     const reportData = await generateSessionCompletionReport(start, end);
@@ -166,10 +155,8 @@ export const getSessionsReport = async (req, res, next) => {
   }
 };
 
-// Get platform usage by city
 export const getLocationsReport = async (req, res, next) => {
   try {
-    // Verify user is admin
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -180,7 +167,7 @@ export const getLocationsReport = async (req, res, next) => {
     const { startDate, endDate } = req.query;
     const start = startDate
       ? new Date(startDate)
-      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Last 30 days
+      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate) : new Date();
 
     const reportData = await generateCityUsageReport(start, end);
@@ -194,10 +181,8 @@ export const getLocationsReport = async (req, res, next) => {
   }
 };
 
-// Get user growth report
 export const getGrowthReport = async (req, res, next) => {
   try {
-    // Verify user is admin
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -208,7 +193,7 @@ export const getGrowthReport = async (req, res, next) => {
     const { startDate, endDate } = req.query;
     const start = startDate
       ? new Date(startDate)
-      : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000); // Last 90 days
+      : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate) : new Date();
 
     const reportData = await generateUserGrowthReport(start, end);
@@ -222,10 +207,8 @@ export const getGrowthReport = async (req, res, next) => {
   }
 };
 
-// Export report data as CSV/JSON
 export const exportReportData = async (req, res, next) => {
   try {
-    // Verify user is admin
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -250,7 +233,6 @@ export const exportReportData = async (req, res, next) => {
 
     let reportData = {};
 
-    // Generate different types of reports
     switch (type) {
       case "subjects":
         reportData = await generateSubjectPopularityReport(start, end);
@@ -272,8 +254,6 @@ export const exportReportData = async (req, res, next) => {
     }
 
     if (format === "csv") {
-      // Convert report data to CSV format
-      // This is a simplified version - in production you'd use a library like csv-stringify
       let csv = "";
 
       switch (type) {
@@ -312,12 +292,9 @@ export const exportReportData = async (req, res, next) => {
   }
 };
 
-// Helper functions to generate different report data
 async function generateSubjectPopularityReport(startDate, endDate) {
-  // Get all tutors and their subjects
   const tutors = await Tutor.find();
 
-  // Count subjects across all tutors
   const subjectCounts = {};
   tutors.forEach((tutor) => {
     tutor.subjects.forEach((subject) => {
@@ -325,7 +302,6 @@ async function generateSubjectPopularityReport(startDate, endDate) {
     });
   });
 
-  // Get sessions for these subjects in the date range
   const sessions = await Session.find({
     createdAt: { $gte: startDate, $lte: endDate },
   }).populate({
@@ -333,7 +309,6 @@ async function generateSubjectPopularityReport(startDate, endDate) {
     select: "subjects",
   });
 
-  // Count sessions per subject
   const subjectSessions = {};
   sessions.forEach((session) => {
     if (session.tutorId && session.tutorId.subjects) {
@@ -359,7 +334,6 @@ async function generateSessionCompletionReport(startDate, endDate) {
     createdAt: { $gte: startDate, $lte: endDate },
   });
 
-  // Count sessions by status
   const statusCounts = {
     pending: { count: 0, percentage: 0 },
     confirmed: { count: 0, percentage: 0 },
@@ -375,7 +349,6 @@ async function generateSessionCompletionReport(startDate, endDate) {
 
   const totalSessions = sessions.length;
 
-  // Calculate percentages
   for (const status in statusCounts) {
     statusCounts[status].percentage =
       totalSessions > 0
@@ -398,12 +371,10 @@ async function generateSessionCompletionReport(startDate, endDate) {
 }
 
 async function generateUserGrowthReport(startDate, endDate) {
-  // Get counts of users created within date range
   const users = await User.find({
     createdAt: { $gte: startDate, $lte: endDate },
   });
 
-  // Group users by month/week
   const usersByMonth = {};
   const usersByRole = {
     student: 0,
@@ -412,15 +383,12 @@ async function generateUserGrowthReport(startDate, endDate) {
   };
 
   users.forEach((user) => {
-    // Count by role
     usersByRole[user.role]++;
 
-    // Count by month
-    const month = user.createdAt.toISOString().slice(0, 7); // YYYY-MM format
+    const month = user.createdAt.toISOString().slice(0, 7);
     usersByMonth[month] = (usersByMonth[month] || 0) + 1;
   });
 
-  // Sort months chronologically
   const sortedMonths = Object.keys(usersByMonth).sort();
   const growthByMonth = sortedMonths.map((month) => ({
     month,
@@ -435,7 +403,6 @@ async function generateUserGrowthReport(startDate, endDate) {
 }
 
 async function generateCityUsageReport(startDate, endDate) {
-  // Get users with location data
   const users = await User.find({
     location: { $exists: true, $ne: "" },
   });
@@ -448,7 +415,6 @@ async function generateCityUsageReport(startDate, endDate) {
     }
   });
 
-  // Get sessions with city data
   const sessions = await Session.find({
     createdAt: { $gte: startDate, $lte: endDate },
     type: "in-person",
@@ -477,27 +443,23 @@ async function generateCityUsageReport(startDate, endDate) {
 }
 
 async function generateEarningsSummaryReport(startDate, endDate) {
-  // Get completed sessions within date range
   const sessions = await Session.find({
     status: "completed",
     updatedAt: { $gte: startDate, $lte: endDate },
   });
 
-  // Calculate total earnings
   const totalEarnings = sessions.reduce(
     (sum, session) => sum + session.amount,
     0
   );
 
-  // Group earnings by month
   const earningsByMonth = {};
 
   sessions.forEach((session) => {
-    const month = session.updatedAt.toISOString().slice(0, 7); // YYYY-MM format
+    const month = session.updatedAt.toISOString().slice(0, 7);
     earningsByMonth[month] = (earningsByMonth[month] || 0) + session.amount;
   });
 
-  // Sort months chronologically
   const sortedMonths = Object.keys(earningsByMonth).sort();
   const earningsOverTime = sortedMonths.map((month) => ({
     month,

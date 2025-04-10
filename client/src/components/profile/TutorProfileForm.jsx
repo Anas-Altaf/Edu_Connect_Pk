@@ -18,7 +18,6 @@ const TutorProfileForm = () => {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Load existing tutor data on mount
   useEffect(() => {
     const loadTutorData = async () => {
       try {
@@ -64,7 +63,6 @@ const TutorProfileForm = () => {
         updateData
       );
       if (response.data.success) {
-        // Update auth context with returned user data
         setCurrentUser({ ...currentUser, ...response.data.data.user });
         setMessage("Profile updated successfully");
       } else {

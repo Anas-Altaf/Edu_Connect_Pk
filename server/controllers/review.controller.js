@@ -4,7 +4,6 @@ export const addReview = async (req, res, next) => {
   try {
     const { tutorId, rating, comment } = req.body;
 
-    // Verify the student is submitting
     if (req.user.role !== "student") {
       return res.status(403).json({
         success: false,
@@ -12,7 +11,6 @@ export const addReview = async (req, res, next) => {
       });
     }
 
-    // Check if tutor exists
     const tutor = await Tutor.findById(tutorId);
     if (!tutor) {
       return res.status(404).json({
@@ -21,7 +19,6 @@ export const addReview = async (req, res, next) => {
       });
     }
 
-    // Check if the student has had a completed session with this tutor
     const hasCompletedSession = await Session.exists({
       studentId: req.user._id,
       tutorId,
@@ -36,7 +33,6 @@ export const addReview = async (req, res, next) => {
       });
     }
 
-    // Validate comment length server-side
     if (!comment || comment.trim().length < 10) {
       return res.status(400).json({
         success: false,
@@ -44,7 +40,6 @@ export const addReview = async (req, res, next) => {
       });
     }
 
-    // Check if the student has already reviewed this tutor
     const existingReview = await Review.findOne({
       studentId: req.user._id,
       tutorId,
@@ -58,7 +53,6 @@ export const addReview = async (req, res, next) => {
       });
     }
 
-    // Create the review
     const review = await Review.create({
       studentId: req.user._id,
       tutorId,
@@ -66,12 +60,9 @@ export const addReview = async (req, res, next) => {
       comment,
     });
 
-    // Update tutor's reviews
     tutor.reviews.push(review._id);
     await tutor.save();
 
-    // The post-save hook in the Review model recalculates tutor.averageRating.
-    // Respond with the new review and updated average rating.
     res.status(201).json({
       success: true,
       message: "Review submitted successfully",
@@ -83,7 +74,6 @@ export const addReview = async (req, res, next) => {
   }
 };
 
-// Get all reviews for a tutor
 export const getTutorReviews = async (req, res, next) => {
   try {
     const tutorId = req.params.id;
@@ -110,12 +100,10 @@ export const getTutorReviews = async (req, res, next) => {
   }
 };
 
-// Delete a review
 export const deleteReview = async (req, res, next) => {
   try {
     const reviewId = req.params.id;
 
-    // Find the review
     const review = await Review.findById(reviewId);
 
     if (!review) {
@@ -125,7 +113,6 @@ export const deleteReview = async (req, res, next) => {
       });
     }
 
-    // Check authorization
     const isAuthor = req.user._id.toString() === review.studentId.toString();
 
     if (!isAuthor && req.user.role !== "admin") {
@@ -135,12 +122,10 @@ export const deleteReview = async (req, res, next) => {
       });
     }
 
-    // Remove review from tutor's reviews array
     await Tutor.findByIdAndUpdate(review.tutorId, {
       $pull: { reviews: reviewId },
     });
 
-    // Delete the review
     await Review.findByIdAndDelete(reviewId);
 
     res.status(200).json({

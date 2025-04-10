@@ -1,7 +1,6 @@
 import { User } from "../models/index.js";
 import bcrypt from "bcryptjs";
 
-// Get user profile
 export const getUserProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).select("-password");
@@ -22,15 +21,12 @@ export const getUserProfile = async (req, res, next) => {
   }
 };
 
-// Update user profile
 export const updateUserProfile = async (req, res, next) => {
   try {
     const { name, location, bio, profilePicture } = req.body;
 
-    // Log incoming fields
     console.log("Incoming fields:", req.body);
 
-    // Only allow updating specific fields
     const updateFields = {};
     if (name) updateFields.name = name;
     if (location) updateFields.location = location;
@@ -60,7 +56,6 @@ export const updateUserProfile = async (req, res, next) => {
   }
 };
 
-// Delete user account
 export const deleteUserAccount = async (req, res, next) => {
   try {
     await User.findByIdAndDelete(req.user._id);
@@ -74,7 +69,6 @@ export const deleteUserAccount = async (req, res, next) => {
   }
 };
 
-// Change password
 export const changePassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -88,7 +82,6 @@ export const changePassword = async (req, res, next) => {
 
     const user = await User.findById(req.user._id);
 
-    // Verify current password
     const isPasswordValid = await bcrypt.compare(
       currentPassword,
       user.password
@@ -100,11 +93,9 @@ export const changePassword = async (req, res, next) => {
       });
     }
 
-    // Hash new password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // Update password
     user.password = hashedPassword;
     await user.save();
 

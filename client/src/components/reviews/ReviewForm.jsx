@@ -12,7 +12,6 @@ const ReviewForm = ({
   initialRating = 0,
   initialComment = "",
 }) => {
-  // ...existing state declarations...
   const [rating, setRating] = useState(initialRating);
   const [comment, setComment] = useState(initialComment);
   const [error, setError] = useState("");

@@ -24,12 +24,11 @@ const SessionCalendar = ({ userId, userRole, tutorId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Generate the dates for the current week view using useMemo
   const weekDates = useMemo(() => {
     const generateWeekDates = (date) => {
-      const currentDay = date.getDay(); // 0-6, where 0 is Sunday
+      const currentDay = date.getDay();
       const startDate = new Date(date);
-      startDate.setDate(date.getDate() - currentDay); // Go to the start of week (Sunday)
+      startDate.setDate(date.getDate() - currentDay);
 
       const dates = [];
       for (let i = 0; i < 7; i++) {
@@ -43,21 +42,18 @@ const SessionCalendar = ({ userId, userRole, tutorId }) => {
     return generateWeekDates(currentDate);
   }, [currentDate]);
 
-  // Fetch sessions for the current week
   useEffect(() => {
     const fetchSessions = async () => {
       if (!weekDates.length || !userId) return;
 
       setLoading(true);
       try {
-        // First day of the week
         const startDate = weekDates[0].toISOString().split("T")[0];
-        // Last day of the week plus 1 day (to include all sessions on the last day)
+
         const endDate = new Date(weekDates[6]);
         endDate.setDate(endDate.getDate() + 1);
         const endDateStr = endDate.toISOString().split("T")[0];
 
-        // Fetch sessions based on user role
         const fetchFunction =
           userRole === "tutor"
             ? sessionAPI.getTutorSessions
@@ -66,7 +62,7 @@ const SessionCalendar = ({ userId, userRole, tutorId }) => {
         const response = await fetchFunction(userId, {
           startDate,
           endDate: endDateStr,
-          status: ["confirmed", "pending"], // Only get confirmed and pending sessions for calendar
+          status: ["confirmed", "pending"],
         });
 
         if (response.data.success) {
@@ -85,52 +81,42 @@ const SessionCalendar = ({ userId, userRole, tutorId }) => {
     fetchSessions();
   }, [weekDates, userId, userRole]);
 
-  // Navigate to previous week
   const previousWeek = () => {
     const newDate = new Date(currentDate);
     newDate.setDate(currentDate.getDate() - 7);
     setCurrentDate(newDate);
   };
 
-  // Navigate to next week
   const nextWeek = () => {
     const newDate = new Date(currentDate);
     newDate.setDate(currentDate.getDate() + 7);
     setCurrentDate(newDate);
   };
 
-  // Jump to today
   const goToToday = () => {
     setCurrentDate(new Date());
   };
 
-  // Format date for display
   const formatDate = (date) => {
     return date.getDate();
   };
 
-  // Check if a date is today
   const isToday = (date) => {
     const today = new Date();
     return date.toDateString() === today.toDateString();
   };
 
-  // Get sessions for a specific date and time slot
   const getSessionsFor = (date, timeSlot) => {
-    // Ensure date is valid
     if (!(date instanceof Date) || isNaN(date.getTime())) return [];
     const dateStr = date.toISOString().split("T")[0];
 
     return sessions.filter((session) => {
-      // Parse session date
       const sessionDate = new Date(session.date);
       if (isNaN(sessionDate.getTime())) return false;
       const sessionDateStr = sessionDate.toISOString().split("T")[0];
 
-      // If session.startTime exists, use it; otherwise fall back
       let sessionStart = "";
       if (session.startTime) {
-        // Format to HH:MM using locale formatting without seconds
         sessionStart = new Date(session.startTime).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -144,7 +130,6 @@ const SessionCalendar = ({ userId, userRole, tutorId }) => {
     });
   };
 
-  // Get status class for a session
   const getStatusClass = (status) => {
     switch (status) {
       case "confirmed":
@@ -156,19 +141,14 @@ const SessionCalendar = ({ userId, userRole, tutorId }) => {
     }
   };
 
-  // Handle session click
   const handleSessionClick = async (sessionId) => {
     try {
-      // Optionally, you could fetch details if needed:
-      // const response = await sessionAPI.getSessionDetails(sessionId);
-      // Navigate to the session detail page
       navigate(`/sessions/${sessionId}`);
     } catch (error) {
       console.error("Error handling session click:", error);
     }
   };
 
-  // Get time display format
   const formatTimeDisplay = (time) => {
     const hour = parseInt(time);
     return `${hour > 12 ? hour - 12 : hour}${hour >= 12 ? "PM" : "AM"}`;

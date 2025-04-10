@@ -14,7 +14,6 @@ const UsersManagementPage = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentLimit] = useState(10);
 
-  // Fetch users with filters
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
@@ -33,7 +32,6 @@ const UsersManagementPage = () => {
         console.log("Users API response:", response.data);
 
         if (response.data.success) {
-          // Handle different response structures
           let userData = [];
           if (Array.isArray(response.data.data)) {
             userData = response.data.data;
@@ -48,7 +46,6 @@ const UsersManagementPage = () => {
 
           setUsers(userData);
 
-          // Get pagination info
           setTotalPages(
             response.data.totalPages || response.data.data?.totalPages || 1
           );

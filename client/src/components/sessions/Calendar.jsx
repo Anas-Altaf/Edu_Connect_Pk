@@ -5,11 +5,9 @@ const Calendar = ({ events = [] }) => {
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Get month name
   const monthName = currentDate.toLocaleString("default", { month: "long" });
   const year = currentDate.getFullYear();
 
-  // Get current week (Sunday to Saturday)
   const getWeekDays = () => {
     const sunday = new Date(currentDate);
     sunday.setDate(currentDate.getDate() - currentDate.getDay());
@@ -25,7 +23,6 @@ const Calendar = ({ events = [] }) => {
 
   const weekDays = getWeekDays();
 
-  // Navigate to previous/next week
   const previousWeek = () => {
     const newDate = new Date(currentDate);
     newDate.setDate(currentDate.getDate() - 7);
@@ -38,7 +35,6 @@ const Calendar = ({ events = [] }) => {
     setCurrentDate(newDate);
   };
 
-  // Check if a date is today
   const isToday = (date) => {
     const today = new Date();
     return (
@@ -48,7 +44,6 @@ const Calendar = ({ events = [] }) => {
     );
   };
 
-  // Get events for a specific day
   const getEventsForDay = (date) => {
     if (!events || !Array.isArray(events)) return [];
 
@@ -66,12 +61,10 @@ const Calendar = ({ events = [] }) => {
     });
   };
 
-  // Format date
   const formatDate = (date) => {
     return date.getDate();
   };
 
-  // Format time
   const formatTime = (dateString) => {
     if (!dateString) return "";
 
@@ -85,7 +78,6 @@ const Calendar = ({ events = [] }) => {
     });
   };
 
-  // Get status class
   const getStatusClass = (status) => {
     switch (status) {
       case "pending":

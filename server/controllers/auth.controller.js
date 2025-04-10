@@ -16,7 +16,7 @@ export const signUp = async (req, res, next) => {
       error.statusCode = 409;
       return next(error);
     }
-    // Hash Password
+
     const salt = await bcrypt.genSalt(10);
 
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -52,7 +52,6 @@ export const signIn = async (req, res, next) => {
   try {
     const { email, password, role } = req.body;
 
-    // Find the user with the provided email and role
     const user = await User.findOne({ email, role });
     if (!user) {
       const error = new Error("User not found");
@@ -60,7 +59,6 @@ export const signIn = async (req, res, next) => {
       return next(error);
     }
 
-    // Compare passwords using the method from the User model
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       const error = new Error("Invalid password");
@@ -68,7 +66,6 @@ export const signIn = async (req, res, next) => {
       return next(error);
     }
 
-    // If login successful, generate token and return user data
     const token = jwt.sign(
       { userId: user._id, version: user.tokenVersion },
       JWT_SECRET,
@@ -88,14 +85,12 @@ export const signIn = async (req, res, next) => {
 };
 export const signOut = async (req, res) => {
   try {
-    // Get the current user from the request (set by the authorize middleware)
     const user = req.user;
 
     if (!user) {
       return res.status(401).json({ message: "User not authenticated" });
     }
 
-    // Increment the token version to invalidate all existing tokens
     await User.findByIdAndUpdate(user._id, { $inc: { tokenVersion: 1 } });
 
     return res.status(200).json({
@@ -114,7 +109,6 @@ export const signOut = async (req, res) => {
 
 export const verifyRole = async (req, res, next) => {
   try {
-    // User is already attached to req by the auth middleware
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -134,7 +128,6 @@ export const verifyRole = async (req, res, next) => {
 
 export const getUserData = async (req, res, next) => {
   try {
-    // User is already attached to req by the auth middleware
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -142,7 +135,6 @@ export const getUserData = async (req, res, next) => {
       });
     }
 
-    // Get fresh user data from DB
     const user = await User.findById(req.user._id).select("-password");
 
     if (!user) {
@@ -161,7 +153,6 @@ export const getUserData = async (req, res, next) => {
   }
 };
 
-// Helper function for role permissions
 const getRolePermissions = (role) => {
   switch (role) {
     case "admin":

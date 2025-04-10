@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const TutorCard = ({ tutor, inWishlist, showBookButton, onToggleWishlist }) => {
   const navigate = useNavigate();
   const [isToggling, setIsToggling] = useState(false);
 
-  // Extract tutor information with safety checks
   const tutorName = tutor?.userId?.name || "Tutor";
   const profilePicture = tutor?.userId?.profilePicture;
   const initials = tutorName
@@ -19,14 +19,26 @@ const TutorCard = ({ tutor, inWishlist, showBookButton, onToggleWishlist }) => {
     tutor?.userId?.location || tutor?.location || "Location not specified";
   const bio = tutor?.userId?.bio || "No bio provided";
 
-  // Handle booking a session
   const handleBookSession = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate(`/sessions/book/${tutor._id}`);
+
+    // Debug tutor object
+    console.log("Tutor object in TutorCard:", tutor);
+    console.log("Tutor ID in TutorCard:", tutor?._id);
+
+    // Ensure tutor._id is valid before navigating
+    if (tutor && tutor._id) {
+      const bookingUrl = `/sessions/book/${tutor._id}`;
+      console.log("Navigating to:", bookingUrl);
+      navigate(bookingUrl);
+    } else {
+      console.error("Invalid tutor ID");
+      // Add toast notification
+      toast.error("Invalid tutor ID. Please try again.");
+    }
   };
 
-  // Handle wishlist toggle
   const handleWishlistToggle = async (e) => {
     e.preventDefault();
     e.stopPropagation();

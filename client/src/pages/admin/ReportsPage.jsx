@@ -7,7 +7,7 @@ const ReportsPage = () => {
   const [reportType, setReportType] = useState("subjects");
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
-    date.setDate(date.getDate() - 30); // Default to last 30 days
+    date.setDate(date.getDate() - 30);
     return date.toISOString().split("T")[0];
   });
   const [endDate, setEndDate] = useState(() => {
@@ -64,7 +64,6 @@ const ReportsPage = () => {
       );
 
       if (format === "csv" && response.data) {
-        // For CSV, create a download link
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
         link.href = url;
@@ -76,7 +75,6 @@ const ReportsPage = () => {
         link.click();
         link.remove();
       } else if (response.data.success) {
-        // For JSON data
         toast.success("Report exported successfully");
       }
     } catch (error) {

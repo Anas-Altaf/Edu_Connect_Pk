@@ -78,18 +78,18 @@ const App = () => {
                   }
                 />
                 <Route
-                  path="/sessions/:id"
-                  element={
-                    <ProtectedRoute>
-                      <SessionDetailPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
                   path="/sessions/book/:tutorId"
                   element={
                     <ProtectedRoute requiredRole="student">
                       <SessionBookingPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/sessions/:id"
+                  element={
+                    <ProtectedRoute>
+                      <SessionDetailPage />
                     </ProtectedRoute>
                   }
                 />
