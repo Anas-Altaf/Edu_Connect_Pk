@@ -31,8 +31,8 @@ const SessionsPage = () => {
           filters.status = activeTab;
         }
 
-        console.log("Fetching sessions with filters:", filters);
-        console.log("Current user role:", currentUser.role);
+        // console.log("Fetching sessions with filters:", filters);
+        // console.log("Current user role:", currentUser.role);
 
         const apiCall =
           currentUser.role === "tutor"
@@ -53,19 +53,17 @@ const SessionsPage = () => {
           let sessionData = [];
 
           if (Array.isArray(response.data.data)) {
-            console.log("Direct array response detected");
             sessionData = response.data.data;
           } else if (
             response.data.data &&
             Array.isArray(response.data.data.sessions)
           ) {
-            console.log("Nested sessions array detected");
             sessionData = response.data.data.sessions;
           } else if (response.data.data) {
-            console.log(
-              "Possible object response detected:",
-              response.data.data
-            );
+            // console.log(
+            //   "Possible object response detected:",
+            //   response.data.data
+            // );
             sessionData = [response.data.data];
           } else {
             console.log("No sessions data found in response");

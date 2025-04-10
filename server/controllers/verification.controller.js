@@ -1,4 +1,7 @@
-import { VerificationRequest, Tutor } from "../models/index.js";
+import { Verification, Tutor } from "../models/index.js";
+
+// Alias for better readability
+const VerificationRequest = Verification;
 
 export const submitVerificationRequest = async (req, res, next) => {
   try {

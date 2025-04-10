@@ -17,6 +17,7 @@ import {
   reportRouter,
   userRouter,
   notificationRouter,
+  adminRouter,
 } from "./routes/index.js";
 import errorMiddleware from "./middleware/error.middleware.js";
 
@@ -49,6 +50,7 @@ app.use("/api/v1/verification", verificationRouter);
 app.use("/api/v1/reports", reportRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/notifications", notificationRouter);
+app.use("/api/v1/admin", adminRouter);
 
 app.get("/", (req, res) => {
   res.send("Welcome to the EDU CONNECT API");

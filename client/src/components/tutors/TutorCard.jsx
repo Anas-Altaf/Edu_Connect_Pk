@@ -23,14 +23,10 @@ const TutorCard = ({ tutor, inWishlist, showBookButton, onToggleWishlist }) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Debug tutor object
-    console.log("Tutor object in TutorCard:", tutor);
-    console.log("Tutor ID in TutorCard:", tutor?._id);
 
     // Ensure tutor._id is valid before navigating
     if (tutor && tutor._id) {
       const bookingUrl = `/sessions/book/${tutor._id}`;
-      console.log("Navigating to:", bookingUrl);
       navigate(bookingUrl);
     } else {
       console.error("Invalid tutor ID");

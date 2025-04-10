@@ -3,6 +3,7 @@ import { JWT_SECRET } from "../config/env.js";
 import { User } from "../models/index.js";
 
 const authorize = async (req, res, next) => {
+  console.log("Auth middleware called");
   try {
     let token;
     if (

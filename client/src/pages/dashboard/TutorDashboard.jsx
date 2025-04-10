@@ -27,7 +27,7 @@ const TutorDashboard = () => {
           status: "confirmed",
         });
 
-        console.log("Tutor sessions response:", sessionResponse.data);
+        // console.log("Tutor sessions response:", sessionResponse.data);
 
         if (sessionResponse.data.success) {
           let sessionData = [];
@@ -47,7 +47,7 @@ const TutorDashboard = () => {
         }
 
         const earningsResponse = await sessionAPI.getEarningsSummary();
-        console.log("Earnings response:", earningsResponse.data);
+        // console.log("Earnings response:", earningsResponse.data);
 
         if (earningsResponse.data.success) {
           setEarnings({
@@ -58,7 +58,7 @@ const TutorDashboard = () => {
         }
 
         const statsResponse = await sessionAPI.getSessionStats();
-        console.log("Stats response:", statsResponse.data);
+        // console.log("Stats response:", statsResponse.data);
 
         if (statsResponse.data.success) {
           setStats(statsResponse.data.data);

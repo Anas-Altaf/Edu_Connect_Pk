@@ -1,27 +1,49 @@
 import React, { useState, useEffect, useContext } from "react";
 import { userAPI } from "../../services/api";
 import { AuthContext } from "../../contexts/AuthContext";
+import { toast } from "react-toastify";
+import Loader from "../ui/Loader";
 
 const StudentProfileForm = () => {
-  const { currentUser, setCurrentUser } = useContext(AuthContext);
+  const { currentUser, updateCurrentUser } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     location: "",
     bio: "",
     profilePicture: "",
   });
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await userAPI.getProfile();
+        if (response.data.success) {
+          const userData = response.data.data;
+          setFormData({
+            name: userData.name || "",
+            email: userData.email || "",
+            location: userData.location || "",
+            bio: userData.bio || "",
+            profilePicture: userData.profilePicture || "",
+          });
+        } else {
+          toast.error("Failed to load profile data");
+        }
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+        toast.error("An error occurred while loading your profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (currentUser) {
-      setFormData({
-        name: currentUser.name || "",
-        location: currentUser.location || "",
-        bio: currentUser.bio || "",
-        profilePicture: currentUser.profilePicture || "",
-      });
+      fetchProfileData();
     }
   }, [currentUser]);
 
@@ -36,20 +58,36 @@ const StudentProfileForm = () => {
     setMessage("");
     setSubmitting(true);
     try {
-      const response = await userAPI.updateProfile(formData);
+      const { email, ...updateData } = formData;
+
+      const response = await userAPI.updateProfile(updateData);
       if (response.data.success) {
-        setCurrentUser(response.data.data);
+        toast.success("Profile updated successfully!");
+
+        updateCurrentUser({
+          ...currentUser,
+          name: formData.name,
+          profilePicture: formData.profilePicture,
+        });
         setMessage("Profile updated successfully");
       } else {
         setError("Failed to update profile");
       }
     } catch (err) {
       console.error("Profile update error:", err);
+      toast.error(
+        err.response?.data?.message ||
+          "An error occurred while updating profile"
+      );
       setError("An error occurred. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return <Loader size="md" />;
+  }
 
   return (
     <form onSubmit={handleSubmit} className="profile-form">

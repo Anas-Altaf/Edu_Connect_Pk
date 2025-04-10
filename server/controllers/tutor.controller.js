@@ -324,3 +324,28 @@ export const getTutorPreview = async (req, res, next) => {
     return next(error);
   }
 };
+
+export const getTutorByUserId = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+
+    const tutor = await Tutor.findOne({ userId }).populate(
+      "userId",
+      "name email profilePicture location bio"
+    );
+
+    if (!tutor) {
+      return res.status(404).json({
+        success: false,
+        message: "Tutor profile not found for this user",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: tutor,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};

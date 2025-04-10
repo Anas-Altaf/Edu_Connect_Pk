@@ -12,6 +12,10 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
+      console.log(
+        "AuthContext - Token check:",
+        token ? "Present" : "Not found"
+      );
       if (token) {
         try {
           const response = await authAPI.getUser();
@@ -34,13 +38,17 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password, role) => {
     try {
+      console.log("Login attempt:", { email, role });
       const response = await authAPI.login(email, password, role);
       if (response.data.success) {
         const { token, user } = response.data.data;
+        console.log("Login successful, user:", user);
+        console.log("Setting token in localStorage");
         localStorage.setItem("token", token);
         setCurrentUser(user);
         return { success: true };
       } else {
+        console.log("Login failed:", response.data.message);
         return {
           success: false,
           message: response.data.message || "Login failed",

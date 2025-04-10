@@ -27,9 +27,9 @@ const UsersManagementPage = () => {
         if (roleFilter !== "all") params.role = roleFilter;
         if (statusFilter !== "all") params.status = statusFilter;
 
-        console.log("Fetching users with params:", params);
+        // console.log("Fetching users with params:", params);
         const response = await userAPI.getAllUsers(params);
-        console.log("Users API response:", response.data);
+        // console.log("Users API response:", response.data);
 
         if (response.data.success) {
           let userData = [];
@@ -133,10 +133,17 @@ const UsersManagementPage = () => {
   return (
     <div className="admin-page">
       <div className="admin-header">
-        <h1 className="admin-title">Users Management</h1>
-        <p className="admin-description">
-          View and manage all users on the platform
-        </p>
+        <div className="admin-title-section">
+          <h1 className="admin-title">Users Management</h1>
+          <p className="admin-description">
+            View and manage all users on the platform
+          </p>
+        </div>
+        <div className="admin-actions">
+          <Link to="/admin/users/create" className="btn btn-primary">
+            Create User
+          </Link>
+        </div>
       </div>
 
       <div className="users-filters">
@@ -146,7 +153,7 @@ const UsersManagementPage = () => {
             placeholder="Search users..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
+            className="search-input input"
           />
           <button type="submit" className="btn btn-primary btn-sm">
             Search
@@ -163,7 +170,7 @@ const UsersManagementPage = () => {
                 setRoleFilter(e.target.value);
                 setPage(1);
               }}
-              className="filter-select"
+              className="filter-select input"
             >
               <option value="all">All Roles</option>
               <option value="student">Students</option>
@@ -173,7 +180,7 @@ const UsersManagementPage = () => {
           </div>
 
           <div className="filter-group">
-            <label htmlFor="status-filter">Status:</label>
+            <label htmlFor="status-filter ">Status:</label>
             <select
               id="status-filter"
               value={statusFilter}
@@ -181,7 +188,7 @@ const UsersManagementPage = () => {
                 setStatusFilter(e.target.value);
                 setPage(1);
               }}
-              className="filter-select"
+              className="filter-select input"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>

@@ -259,7 +259,7 @@ export const getTutorSessions = async (req, res, next) => {
 
 export const updateSession = async (req, res, next) => {
   try {
-    const { date, timeSlot, type, status } = req.body;
+    const { date, timeSlot, type, subject, status } = req.body;
     const sessionId = req.params.id;
 
     const session = await Session.findById(sessionId);
@@ -322,6 +322,7 @@ export const updateSession = async (req, res, next) => {
       }
 
       if (type) session.type = type;
+      if (subject) session.subject = subject;
 
       if (status === "canceled") {
         session.status = "canceled";

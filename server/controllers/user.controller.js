@@ -25,7 +25,7 @@ export const updateUserProfile = async (req, res, next) => {
   try {
     const { name, location, bio, profilePicture } = req.body;
 
-    console.log("Incoming fields:", req.body);
+    // console.log("Incoming fields:", req.body);
 
     const updateFields = {};
     if (name) updateFields.name = name;

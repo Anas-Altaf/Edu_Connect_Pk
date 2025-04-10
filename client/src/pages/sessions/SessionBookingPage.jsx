@@ -25,7 +25,7 @@ const SessionBookingPage = () => {
 
   useEffect(() => {
     // Debug the tutorId
-    console.log("TutorId from params:", tutorId);
+    // console.log("TutorId from params:", tutorId);
 
     if (!currentUser) {
       navigate("/auth/login");
@@ -37,9 +37,9 @@ const SessionBookingPage = () => {
       return;
     }
 
-    // Validate tutorId
-    console.log("Validating tutorId:", tutorId);
-    console.log("tutorId type:", typeof tutorId);
+    // // Validate tutorId
+    // console.log("Validating tutorId:", tutorId);
+    // console.log("tutorId type:", typeof tutorId);
 
     if (!tutorId || tutorId === "undefined" || tutorId === undefined) {
       console.error("Invalid tutorId detected:", tutorId);
@@ -48,7 +48,6 @@ const SessionBookingPage = () => {
       return;
     }
 
-    // Try to parse the tutorId to ensure it's a valid MongoDB ObjectId
     if (!/^[0-9a-fA-F]{24}$/.test(tutorId)) {
       console.error("Invalid MongoDB ObjectId format:", tutorId);
       setError("Invalid tutor ID format. Please go back and try again.");

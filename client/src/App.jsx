@@ -29,6 +29,7 @@ import UnauthorizedPage from "./pages/UnauthorizedPage";
 
 import UsersManagementPage from "./pages/admin/UsersManagementPage";
 import UserDetailsPage from "./pages/admin/UserDetailsPage";
+import CreateUserPage from "./pages/admin/CreateUserPage";
 import VerificationRequestsPage from "./pages/admin/VerificationRequestsPage";
 import ReportsPage from "./pages/admin/ReportsPage";
 
@@ -124,6 +125,14 @@ const App = () => {
                   element={
                     <ProtectedRoute requiredRole="admin">
                       <UsersManagementPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users/create"
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <CreateUserPage />
                     </ProtectedRoute>
                   }
                 />

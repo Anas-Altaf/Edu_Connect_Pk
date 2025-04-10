@@ -7,6 +7,7 @@ import verificationRouter from "./verification.routes.js";
 import reportRouter from "./reports.routes.js";
 import userRouter from "./users.routes.js";
 import notificationRouter from "./notifications.routes.js";
+import adminRouter from "./admin.routes.js";
 
 export {
   authRouter,
@@ -18,4 +19,5 @@ export {
   reportRouter,
   userRouter,
   notificationRouter,
+  adminRouter,
 };

@@ -6,8 +6,16 @@ axios.defaults.baseURL =
 axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
+    console.log(
+      "Request interceptor - Token:",
+      token ? "Present" : "Not found"
+    );
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
+      console.log(
+        "Setting Authorization header:",
+        `Bearer ${token.substring(0, 10)}...`
+      );
     }
     return config;
   },
@@ -52,20 +60,34 @@ export const authAPI = {
 };
 
 export const userAPI = {
+  // User profile management
   getProfile: () => axios.get("/api/v1/users/profile"),
   updateProfile: (data) => axios.put("/api/v1/users/profile", data),
   changePassword: (currentPassword, newPassword) =>
     axios.put("/api/v1/users/password", { currentPassword, newPassword }),
   deleteAccount: () => axios.delete("/api/v1/users"),
 
-  getAllUsers: (params) => axios.get("/api/v1/users", { params }),
-  getUserById: (userId) => axios.get(`/api/v1/users/${userId}`),
+  // Admin user management
+  getAllUsers: (params) => axios.get("/api/v1/admin/users", { params }),
+  getUserById: (userId) => axios.get(`/api/v1/admin/users/${userId}`),
   updateUser: (userId, userData) =>
-    axios.put(`/api/v1/users/${userId}`, userData),
+    axios.put(`/api/v1/admin/users/${userId}`, userData),
   updateUserStatus: (userId, status) =>
-    axios.put(`/api/v1/users/${userId}/status`, { status }),
-  deleteUser: (userId) => axios.delete(`/api/v1/users/${userId}`),
-  createUser: (userData) => axios.post("/api/v1/users", userData),
+    axios.put(`/api/v1/admin/users/${userId}/status`, { status }),
+  deleteUser: (userId) => axios.delete(`/api/v1/admin/users/${userId}`),
+  createUser: (userData) => axios.post("/api/v1/admin/users", userData),
+
+  // Admin test
+  testAdminAccess: () => {
+    console.log("Testing admin access");
+    return axios.get("/api/v1/admin/test");
+  },
+
+  // Admin dashboard
+  getDashboardStats: () => {
+    console.log("Calling getDashboardStats API");
+    return axios.get("/api/v1/admin/dashboard");
+  },
 };
 
 export const tutorAPI = {
@@ -119,11 +141,11 @@ export const sessionAPI = {
   bookSession: (data) => axios.post("/api/v1/sessions", data),
   getSessionDetails: (id) => axios.get(`/api/v1/sessions/${id}`),
   getStudentSessions: (filters) => {
-    console.log("Calling getStudentSessions with filters:", filters);
+    // console.log("Calling getStudentSessions with filters:", filters);
     return axios.get("/api/v1/sessions/student", { params: filters });
   },
   getTutorSessions: (filters) => {
-    console.log("Calling getTutorSessions with filters:", filters);
+    // console.log("Calling getTutorSessions with filters:", filters);
     return axios.get("/api/v1/sessions/tutor", { params: filters });
   },
   updateSession: (id, data) => axios.put(`/api/v1/sessions/${id}`, data),

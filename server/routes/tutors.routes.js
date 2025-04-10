@@ -8,12 +8,14 @@ import {
   deleteTutorProfile,
   updateProfileImage,
   getTutorPreview,
+  getTutorByUserId,
 } from "../controllers/tutor.controller.js";
 import authorize, { authorizeRoles } from "../middleware/auth.middleware.js";
 
 const tutorRouter = Router();
 
 tutorRouter.get("/", getAllTutors);
+tutorRouter.get("/user/:userId", getTutorByUserId);
 tutorRouter.get("/:id", getTutorDetails);
 tutorRouter.get("/:id/preview", getTutorPreview);
 
