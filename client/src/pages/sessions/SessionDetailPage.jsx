@@ -284,7 +284,7 @@ const SessionDetailPage = () => {
               )}
 
               {(session.status === "completed" ||
-                session.status === "canceled") && (
+                session.status === "cancelled") && (
                 <p className="text-muted">
                   No actions available for this session.
                 </p>

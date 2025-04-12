@@ -32,7 +32,7 @@ export const SESSION_STATUS = [
   { value: "pending", label: "Pending", color: "warning" },
   { value: "confirmed", label: "Confirmed", color: "info" },
   { value: "completed", label: "Completed", color: "success" },
-  { value: "canceled", label: "Canceled", color: "danger" },
+  { value: "cancelled", label: "Cancelled", color: "danger" },
 ];
 
 export const TEACHING_PREFERENCES = [
